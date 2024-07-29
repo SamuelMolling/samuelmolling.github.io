@@ -23,3 +23,17 @@
   {% endif %}
   </div>
 {% endif %}
+
+<script>
+  const sidebar = document.querySelector('.sidebar');
+
+  function handleScroll() {
+    if (window.scrollY > 30) {
+      sidebar.classList.add('scrolled');
+    } else {
+      sidebar.classList.remove('scrolled');
+    }
+  }
+
+  window.addEventListener('scroll', handleScroll);
+</script>

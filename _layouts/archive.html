@@ -22,3 +22,12 @@ layout: default
     {{ content }}
   </div>
 </div>
+
+<script>
+  // Adiciona a classe 'archive' após o carregamento da página
+  window.addEventListener('load', function() {
+      document.querySelectorAll('.archive').forEach(function(element) {
+          element.classList.add('archive');
+      });
+  });
+</script>

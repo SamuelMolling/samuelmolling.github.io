@@ -2,8 +2,24 @@
    ARCHIVE
    ========================================================================== */
 
+@keyframes slideUp {
+  from {
+    transform: translateY(20px); /* Deslocamento inicial */
+    opacity: 0; /* Inicialmente invisível */
+  }
+  to {
+    transform: translateY(0); /* Volta à posição original */
+    opacity: 1; /* Fica visível */
+  }
+}
+
 .archive {
   margin-bottom: 2em;
+  transform: translateY(20px); /* Ajuste conforme necessário */
+  opacity: 1;
+  animation: slideUp 1s ease-out forwards;
+  z-index: -3;
+  position: relative;
 
   @include breakpoint($medium) {
     @include span(12 of 12);
@@ -15,7 +31,7 @@
   }
 
   a {
-    text-decoration: underline;
+    text-decoration: none;
 
     &:hover {
       text-decoration: underline;
@@ -27,12 +43,28 @@
   }
 }
 
+.list__item {
+  background: #616060;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  li {
+    list-style: none;
+  }
+}
+
+.list__item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
 .archive__subtitle {
   margin: 1.414em 0 0;
   padding-bottom: 0.5em;
   font-size: $type-size-5;
   color: mix(#fff, $gray, 25%);
-  border-bottom: 1px solid $border-color;
 
   + .list__item .archive__item-title {
     margin-top: 0.5em;
@@ -40,6 +72,7 @@
 }
 
 .archive__item-title {
+  margin-top: 20px;
   margin-bottom: 0.25em;
   font-family: $sans-serif-narrow;
 
@@ -80,7 +113,7 @@
   }
 
   .archive__item-title {
-    text-decoration: underline;
+    text-decoration: none;
   }
 }
 

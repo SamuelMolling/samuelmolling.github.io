@@ -4,17 +4,18 @@
 
 .masthead {
   position: fixed;
-  background: white;
-  border-bottom: 1px solid $border-color;
+  background: transparent;
+  backdrop-filter: blur(10px);
   height: $masthead-height;
   top: 0;
   width: 100%;
+  transition: background-color 0.3s, box-shadow 0.3s;
+  z-index: 20;
 
   -webkit-animation: intro 0.3s both;
           animation: intro 0.3s both;
   -webkit-animation-delay: 0.15s;
           animation-delay: 0.15s;
-  z-index: 20;
 
   &__inner-wrap {
     @include container;
@@ -32,6 +33,26 @@
 
     a {
       text-decoration: none;
+      color: #333;
+      transition: color 0.3s;
+
+      &:hover {
+        color: #ffe200;
+      }
+    }
+  }
+}
+
+.masthead.scrolled {
+  transition: background 0.1s;
+  background: #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  a {
+    color: #fff;
+
+    &:hover {
+      color: #ffe200;
     }
   }
 }
@@ -55,4 +76,13 @@
     padding-right: 3em;
     font-weight: 700;
   }
+}
+
+/* ==========================================================================
+  Scroll Effect
+  ========================================================================== */
+
+body {
+  transition: padding-top 1s ease-in-out;
+  padding-top: $masthead-height;
 }
