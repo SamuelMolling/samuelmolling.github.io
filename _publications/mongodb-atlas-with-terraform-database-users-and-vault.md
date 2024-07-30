@@ -2,7 +2,7 @@
 title: "MongoDB Atlas With Terraform: Database Users and Vault"
 collection: publications
 permalink: /publications/mongodb-atlas-with-terraform-database-users-and-vault
-excerpt: 'In this tutorial, I will show you how to create a cluster and backup policies using Terraform and MongoDB Atlas. This tutorial is aimed at people who want to maintain their infrastructure as code (IaC) in a standardized and simple way.'
+excerpt: 'In this tutorial, I will show how to create a user for the MongoDB database in Atlas using Terraform and how to store this credential securely in HashiCorp Vault.'
 date: 2024-04-15
 venue: 'MongoDB Developer Center'
 paperurl: 'https://www.mongodb.com/developer/products/atlas/mongodb-atlas-terraform-database-users-vault/'
