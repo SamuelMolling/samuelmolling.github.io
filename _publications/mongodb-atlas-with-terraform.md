@@ -6,7 +6,7 @@ excerpt: 'This article is about how to create a MongoDB Atlas cluster using Terr
 date: 2024-01-23
 venue: 'MongoDB Developer Center'
 # slidesurl: 'http://academicpages.github.io/files/slides1.pdf'
-paperurl: 'http://gschmitto.github.io/files/paper1.pdf'
+paperurl: 'https://www.mongodb.com/developer/products/atlas/mongodb-atlas-with-terraform/#creating-a-project'
 # citation: 'Your Name, You. (2009). &quot;Paper Title Number 1.&quot; <i>Journal 1</i>. 1(1).'
 ---
 In this tutorial, I will show you how to start using MongoDB Atlas with Terraform and create some simple resources. This first part is simpler and more introductory, but in the next article, I will explore more complex items and how to connect the creation of several resources into a single module. The tutorial is aimed at people who want to maintain their infrastructure as code (IaC) in a standardized and simple way. If you already use or want to use IaC on the MongoDB Atlas platform, this article is for you.
