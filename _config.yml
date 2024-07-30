@@ -23,12 +23,12 @@ author:
   # Biographic information
   avatar: "profile.png"
   name: "Samuel Molling"
-  pronouns: # example: "she/her"
+  pronouns: "He/Him"
   bio: "Staff Database Reliability Engineer"
   location: "Brazil / RS"
   employer: "Unisinos"
   uri: # URL
-  email: "none@example.org"
+  email: "samuelmolling@gmail.com"
 
   # Academic websites
   arxiv: # URL - Update with the correct link to your profile
@@ -45,7 +45,7 @@ author:
   dribbble: # Username
   github: "samuelmolling"
   kaggle: # Username
-  stackoverflow: # User number or user number and name (i.e., use "1" or "1/jeff-atwood")
+  stackoverflow: "Samuel Molling"
 
   # Social media
   bluesky: # "bsky.app" # Replace this with you Bluesky username
