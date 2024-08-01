@@ -53,11 +53,15 @@ Talks
     {% include archive-single-talk-cv.html  %}
   {% endfor %}</ul>
   
-<!-- Teaching
+Badges
 ======
-  <ul>{% for post in site.teaching reversed %}
-    {% include archive-single-cv.html %}
-  {% endfor %}</ul> -->
+  {% include badges.html %}
+
+Certifications
+======
+  <ul>{% for post in site.certifications reversed %}
+    {% include archive-single-certification-cv.html  %}
+  {% endfor %}</ul>
   
 Service and leadership
 ======
