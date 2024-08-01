@@ -27,5 +27,39 @@ layout: compress
 
     {% include scripts.html %}
 
+    <script>
+      window.addEventListener('scroll', function() {
+        var masthead = document.querySelector('.masthead');
+        if (window.scrollY > 50) {
+          masthead.classList.add('scrolled');
+        } else {
+          masthead.classList.remove('scrolled');
+        }
+      });
+    
+      document.addEventListener("DOMContentLoaded", function() {
+        var nav = document.querySelector('.greedy-nav');
+        
+        window.addEventListener('scroll', function() {
+          if (window.scrollY > 50) { // ajusta esse valor conforme necessário
+            nav.classList.add('scrolled');
+          } else {
+            nav.classList.remove('scrolled');
+          }
+        });
+      });
+
+      const sidebar = document.querySelector('.sidebar');
+
+      function handleScroll() {
+        if (window.scrollY > 30) {
+          sidebar.classList.add('scrolled');
+        } else {
+          sidebar.classList.remove('scrolled');
+        }
+      }
+
+      window.addEventListener('scroll', handleScroll);
+    </script>
   </body>
 </html>

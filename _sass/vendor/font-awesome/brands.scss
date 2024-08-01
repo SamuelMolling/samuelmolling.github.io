@@ -28,3 +28,16 @@
 @each $name, $icon in $fa-brand-icons {
   .#{$fa-css-prefix}-#{$name}:before { content: unquote("\"#{ $icon }\""); }
 }
+
+.fab.fa-credly::before {
+  content: '';
+  display: inline-block;
+  width: 11px;
+  height: 13px;
+  background-image: url('../../../assets/icons/svgviewer-output.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: relative;
+  bottom: -2px;
+}

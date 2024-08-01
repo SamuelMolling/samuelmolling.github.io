@@ -23,10 +23,33 @@
     @include suffix(2 of 12);
   }
 
+  .featured-image {
+    text-align: center; /* Centraliza a imagem e a legenda */
+    margin-bottom: 0px;
+    position: relative;
+    bottom: -10px;
+    z-index: -1;
+  }
+  
+  .featured-image img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 0px;
+    border-radius: 10px 10px 0 0;
+  }
+  
+  .featured-image-caption {
+    font-style: italic; /* Estilo para a legenda */
+    color: #666; /* Cor do texto da legenda */
+    margin-top: 5px; /* Espaçamento superior para a legenda */
+  }  
+
   .page__inner-wrap {
     background-color: #4d4d4d;
     border-radius: 10px;
     padding: 35px;
+    z-index: -2;
+    position: relative;
     
     @include full();
 
