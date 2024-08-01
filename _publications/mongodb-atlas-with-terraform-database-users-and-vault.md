@@ -312,7 +312,7 @@ We run a Terraform init in the terminal in the folder where the files are locate
 
 ```sh
 export MONGODB_ATLAS_PUBLIC_KEY="your_public_key"
-export MONGODB_ATLAS_PRIVATE_KEY=your_private_key"
+export MONGODB_ATLAS_PRIVATE_KEY="your_private_key"
 ```
 
 Now, we run init and then plan, as in previous articles.

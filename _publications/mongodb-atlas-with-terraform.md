@@ -37,19 +37,15 @@ To create an API key, you must:
 1. Select Access Manager at the top of the page, and click Organization Access.
 
 2. Click Create API Key.
-
 ![](/images/mongodb-atlas-with-terraform/image1.png)
 
 3. Enter a brief description of the API key and the necessary permission. In this case, I put it as Organization Owner. After that, click Next.
-
 ![](/images/mongodb-atlas-with-terraform/image2.png)
 
 4. Your API key will be displayed on the screen.
-
 ![](/images/mongodb-atlas-with-terraform/image3.png)
 
 5. Release IP in the Access List (optional): If you have enabled your organization to use API keys, the requestor's IP must be released in the Access List; you must include your IP in this list. To validate whether it is enabled or not, go to **Organization Settings -> Require IP Access List** for the Atlas Administration API. In my case, it is disabled, as it is just a demonstration, but in case you are using this in an organization, I strongly advise you to enable it.
-
 ![](/images/mongodb-atlas-with-terraform/image4.png)
 
 After creating an API key, let's start working with Terraform. You can use the IDE of your choice; I will be using VS Code. Create the files within a folder. The files we will need at this point are:
