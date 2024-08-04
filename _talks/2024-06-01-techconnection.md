@@ -2,7 +2,7 @@
 title: "Build Indexes, Query Insights and Atlas Search with MongoDB"
 collection: talks
 type: "Talk"
-permalink: /talks/
+permalink: /talks/2024-06-01-techconnection
 venue: "Tech Connection"
 date: 2024-06-01
 location: "Balneário Camboriú, SC, Brazil"

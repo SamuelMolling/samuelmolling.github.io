@@ -2,7 +2,7 @@
 title: "Query Tunning"
 collection: talks
 type: "Talk"
-permalink: /talks/
+permalink: /talks/2024-12-20-query-tunning
 venue: "Tech Talks"
 date: 2023-12-20
 location: "Remote"
