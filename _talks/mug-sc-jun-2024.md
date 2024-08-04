@@ -14,5 +14,3 @@ Drawing from the material provided by MongoDB for Developer Days, I demonstrated
 Participants gained valuable knowledge on leveraging Atlas Search and Vector Search, understanding the best practices and real-world applications of these technologies. The session was well-received, with attendees appreciating the practical demonstrations and the clear guidance on utilizing MongoDB's advanced search features.
 
 [More information here](https://mongodb-developer.github.io/search-lab/)
-
-> Note: The slides are in Portuguese, the native language of the community.
