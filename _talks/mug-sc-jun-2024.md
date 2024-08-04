@@ -1,0 +1,18 @@
+---
+title: "Atlas Search and Vector Search with MongoDB"
+collection: talks
+type: "Talk"
+permalink: /talks/
+venue: "MongoDB User Group"
+date: 2024-06-04
+location: "Florianópolis, SC, Brazil"
+---
+I recently delivered a talk at the MongoDB User Group in Florianópolis, SC, Brazil, focused on Atlas Search and Vector Search with MongoDB. The session aimed to provide practical insights on how to use these features, discussing their benefits and various use cases.
+
+Drawing from the material provided by MongoDB for Developer Days, I demonstrated hands-on techniques to effectively implement Atlas Search and Vector Search. The talk covered the setup, configuration, and optimization of these search capabilities to enhance application performance and user experience.
+
+Participants gained valuable knowledge on leveraging Atlas Search and Vector Search, understanding the best practices and real-world applications of these technologies. The session was well-received, with attendees appreciating the practical demonstrations and the clear guidance on utilizing MongoDB's advanced search features.
+
+[More information here](https://mongodb-developer.github.io/search-lab/)
+
+> Note: The slides are in Portuguese, the native language of the community.
