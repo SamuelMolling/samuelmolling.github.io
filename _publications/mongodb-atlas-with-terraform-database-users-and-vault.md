@@ -6,6 +6,8 @@ excerpt: 'In this tutorial, I will show how to create a user for the MongoDB dat
 date: 2024-04-15
 venue: 'MongoDB Developer Center'
 paperurl: 'https://www.mongodb.com/developer/products/atlas/mongodb-atlas-terraform-database-users-vault/'
+featuredimage: /images/mongodb-atlas-with-terraform-database-users-and-vault/cabecalho.png
+featuredimage_alt: "Imagem de cabeçalho"
 ---
 In this tutorial, I will show how to create a user for the MongoDB database in Atlas using Terraform and how to store this credential securely in HashiCorp Vault. We saw in the previous article, 
 MongoDB Atlas With Terraform - Cluster and Backup Policies(https://gschmitto.github.io/publications/mongodb-atlas-with-terraform-cluster-and-backup-policies), how to create a cluster with configured backup policies. Now, we will go ahead and create our first user. If you haven't seen the previous articles, I suggest you look to understand how to get started.

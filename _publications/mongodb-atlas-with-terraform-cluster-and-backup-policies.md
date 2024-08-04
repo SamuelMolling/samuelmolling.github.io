@@ -6,6 +6,8 @@ excerpt: 'In this tutorial, I will show you how to create a cluster and backup p
 date: 2024-03-04
 venue: 'MongoDB Developer Center'
 paperurl: 'https://www.mongodb.com/developer/products/atlas/atlas-terraform-cluster-backup-policies/'
+featuredimage: /images/mongodb-atlas-with-terraform-cluster-and-backup-policies/cabecalho.png
+featuredimage_alt: "Imagem de cabeçalho"
 ---
 In this tutorial, I will show you how to create a MongoDB cluster in Atlas using Terraform. We saw in a [previous article](https://gschmitto.github.io/publications/mongodb-atlas-with-terraform) how to create an API key to start using Terraform and create our first project module. Now, we will go ahead and create our first cluster. If you don't have an API key and a project, I recommend you look at the previous article.
 
