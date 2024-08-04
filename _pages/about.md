@@ -14,10 +14,10 @@ I hold a B.S. in Computer Engineering from Unisinos (2024) and currently work as
 I also run a consultancy firm, SM Consulting, where I provide support to companies looking to improve, automate, and scale their IT operations. My consultancy services are focused on delivering tailored solutions that optimize performance and drive innovation.
 
 ## What You Will Find Here 🔍
-- **Blog:** Articles and tutorials on database technologies, query optimization, artificial intelligence, cloud providers, IaC, software engineering, and best practices in the tech industry.
-- **Projects:** A showcase of the projects I've worked on, highlighting my contributions and the technologies used.
-- **Talks and Events:** Information about the talks and workshops I've conducted, covering topics such as qdatabases, security, artificial intelligence, cloud solutions, IaC, and more.
-- **Contact:** Ways to get in touch with me for collaborations, consultations, or simply to exchange ideas.
+- **Publications:** Articles and tutorials on database technologies, query optimization, artificial intelligence, cloud providers, IaC, software engineering, and best practices in the tech industry.
+- **Portfolio:** A showcase of the projects I've worked on, highlighting my contributions and the technologies used.
+- **Talks:** Information about the talks and workshops I've conducted, covering topics such as qdatabases, security, artificial intelligence, cloud solutions, IaC, and more.
+- **CV:** My professional experience, education, certifications, and skills.
 
 ## Latest Updates 📅
 Check out my recent event at the MongoDB User Group in Florianópolis, SC, Brazil, where I presented on Atlas Search and Vector Search with MongoDB. See the slides and materials available in the Talks section.
