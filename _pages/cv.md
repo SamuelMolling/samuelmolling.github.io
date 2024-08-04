@@ -15,11 +15,11 @@ Education
 
 Work experience
 ======
-* Founder and CEO, SM Consulting
+* Founder, SM Consulting
   * Sep 2023 - Present
   * Location: Campo Bom, Brazil
   
-    As the Founder and CEO of SM Consulting, I lead a team of experts in providing consultancy services to companies seeking to optimize, automate, and scale their IT operations. Our consultancy services are tailored to each client's unique needs, focusing on delivering solutions that enhance performance, drive innovation, and ensure the reliability and scalability of their IT systems.
+    As the Founder of SM Consulting, I lead a team of experts in providing consultancy services to companies seeking to optimize, automate, and scale their IT operations. Our consultancy services are tailored to each client's unique needs, focusing on delivering solutions that enhance performance, drive innovation, and ensure the reliability and scalability of their IT systems.
 
     We specialize in database technologies, Infrastructure as Code (IaC), cloud platforms, artificial intelligence, software engineering, and various other technologies. Our team of professionals brings a wealth of experience and expertise to each project, working closely with clients to understand their requirements and develop customized solutions that meet their specific goals and objectives.
 
