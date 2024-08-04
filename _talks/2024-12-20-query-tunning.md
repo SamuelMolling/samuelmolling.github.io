@@ -1,5 +1,5 @@
 ---
-title: "Query Tunning"
+title: "Tech Talks about Query Tunning"
 collection: talks
 type: "Talk"
 permalink: /talks/2024-12-20-query-tunning
