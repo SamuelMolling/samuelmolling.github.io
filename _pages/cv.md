@@ -15,6 +15,18 @@ Education
 
 Work experience
 ======
+* Founder and CEO, SM Consulting
+  * Sep 2023 - Present
+  * Location: Campo Bom, Brazil
+  
+    As the Founder and CEO of SM Consulting, I lead a team of experts in providing consultancy services to companies seeking to optimize, automate, and scale their IT operations. Our consultancy services are tailored to each client's unique needs, focusing on delivering solutions that enhance performance, drive innovation, and ensure the reliability and scalability of their IT systems.
+
+    We specialize in database technologies, Infrastructure as Code (IaC), cloud platforms, artificial intelligence, software engineering, and various other technologies. Our team of professionals brings a wealth of experience and expertise to each project, working closely with clients to understand their requirements and develop customized solutions that meet their specific goals and objectives.
+
+    Our consultancy services cover a wide range of areas, including database optimization, cloud migration, automation, security, performance tuning, and more. We work with clients across various industries, providing strategic guidance, technical expertise, and hands-on support to help them achieve their IT objectives and drive business growth.
+
+    By leveraging our deep industry knowledge, technical skills, and innovative approach, we help our clients stay ahead of the curve and adapt to the rapidly evolving technology landscape. Our focus on collaboration, innovation, and excellence sets us apart and enables us to deliver exceptional results for our clients.
+
 * Staff Database Reliability Engineer, PicPay
   * Sep 2023 - Present
   * Location: São Paulo, Brazil

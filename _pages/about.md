@@ -1,10 +1,30 @@
 ---
 permalink: /
-title: "Academic Pages is a ready-to-fork GitHub Pages template for academic personal websites"
+title: "Hi, I'm Samuel Molling. Welcome to my personal website! 👋"
 author_profile: true
 redirect_from: 
   - /about/
   - /about.html
 ---
+A passionate and professional Computer Engineer with a broad range of interests and expertise, from database optimization to artificial intelligence. This space is dedicated to sharing my experiences, projects, and the knowledge I've acquired throughout my career.
 
-This is the front page of a website that is powered by the [Academic Pages template](https://github.com/academicpages/academicpages.github.io) and hosted on GitHub pages. [GitHub pages](https://pages.github.com) is a free service in which websites are built and hosted from code and data stored in a GitHub repository, automatically updating when a new commit is made to the respository. This template was forked from the [Minimal Mistakes Jekyll Theme](https://mmistakes.github.io/minimal-mistakes/) created by Michael Rose, and then extended to support the kinds of content that academics have: publications, talks, teaching, a portfolio, blog posts, and a dynamically-generated CV. You can fork [this repository](https://github.com/academicpages/academicpages.github.io) right now, modify the configuration and markdown files, add your own PDFs and other content, and have your own site for free, with no ads! An older version of this template powers my own personal website at [stuartgeiger.com](http://stuartgeiger.com), which uses [this Github repository](https://github.com/staeiou/staeiou.github.io).
+## About Me 🚀
+I hold a B.S. in Computer Engineering from Unisinos (2024) and currently work as a Staff Database Reliability Engineer (DBRE) at PicPay in São Paulo, Brazil. While my core expertise lies in database technologies, I also have extensive knowledge in Infrastructure as Code (IaC), cloud platforms, artificial intelligence, software engineering, and various other technologies. My passion for technology and innovation drives me to continuously explore new tools and techniques to enhance the performance, reliability, and scalability of IT systems.
+
+I also run a consultancy firm, SM Consulting, where I provide support to companies looking to improve, automate, and scale their IT operations. My consultancy services are focused on delivering tailored solutions that optimize performance and drive innovation.
+
+## What You Will Find Here 🔍
+- **Blog:** Articles and tutorials on database technologies, query optimization, artificial intelligence, cloud providers, IaC, software engineering, and best practices in the tech industry.
+- **Projects:** A showcase of the projects I've worked on, highlighting my contributions and the technologies used.
+- **Talks and Events:** Information about the talks and workshops I've conducted, covering topics such as qdatabases, security, artificial intelligence, cloud solutions, IaC, and more.
+- **Contact:** Ways to get in touch with me for collaborations, consultations, or simply to exchange ideas.
+
+## Latest Updates 📅
+Check out my recent event at the MongoDB User Group in Florianópolis, SC, Brazil, where I presented on Atlas Search and Vector Search with MongoDB. See the slides and materials available in the Talks section.
+
+## Let's Connect! 🤝
+I'm always open to new opportunities and collaborations. If you have an interesting project or want to discuss technology, feel free to reach out. Let's build something amazing together!
+
+---
+
+**Note:** Most of my content and presentations are available in Portuguese, my native language.
