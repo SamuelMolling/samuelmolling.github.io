@@ -8,6 +8,8 @@ venue: 'MongoDB Developer Center'
 paperurl: 'https://www.mongodb.com/developer/products/atlas/mongodb-atlas-with-terraform'
 featuredimage: /images/mongodb-atlas-with-terraform/cabecalho.png
 featuredimage_alt: "Imagem de cabeçalho"
+tags:
+  - mongodb
 # slidesurl: 'http://academicpages.github.io/files/slides2.pdf'
 # paperurl: 'http://academicpages.github.io/files/paper2.pdf'
 ---
