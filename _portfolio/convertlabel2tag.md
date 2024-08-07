@@ -1,6 +1,6 @@
 ---
 title: "ConvertLabel2Tag"
-excerpt: "Code for converting MongoDB Atlas labels to tags in dedicated clusters. <br/><img src='/images/golang-shirt-mongo.png'>"
+excerpt: "Code for converting MongoDB Atlas labels to tags in dedicated clusters. <br/><img src='/images/golang-with-mongo.png'>"
 collection: portfolio
 tags:
   - mongodb
