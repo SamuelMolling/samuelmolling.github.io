@@ -7,6 +7,8 @@ venue: "Tech Connection"
 date: 2024-06-01
 location: "Balneário Camboriú, SC, Brazil"
 slidesurl: "http://gschmitto.github.io/files/index-query-insights-and-atlas-search-techconnection.pdf"
+tags:
+  - mongodb
 ---
 I recently delivered a talk at the Tech Connection community event in Balneário Camboriú, SC, Brazil, focused on building indexes, query insights, and using Atlas Search with MongoDB. The session aimed to educate the community on the various types of indexes in MongoDB, their benefits, and practical use cases for each.
 

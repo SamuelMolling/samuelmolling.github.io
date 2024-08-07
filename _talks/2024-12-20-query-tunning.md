@@ -7,6 +7,11 @@ venue: "Tech Talks"
 date: 2023-12-20
 location: "Remote"
 slidesurl: "http://gschmitto.github.io/files/query-tunning-agilize.pdf"
+tags:
+  - mysql
+  - postgresql
+# videolink: "https://www.youtube.com/embed/HcDJdKfm5nA"
+# slidesurl: "http://academicpages.github.io/files/slides1.pdf"
 ---
 I recently delivered a talk on query tuning for a company I was assisting with database optimization. The session focused on techniques to enhance the performance of database queries, covering best practices, common pitfalls, and real-world examples. I demonstrated how to identify and resolve inefficiencies in SQL queries, utilize indexing effectively, and leverage database statistics for performance improvement.
 

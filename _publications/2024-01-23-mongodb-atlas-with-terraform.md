@@ -10,6 +10,7 @@ featuredimage: /images/mongodb-atlas-with-terraform/cabecalho.png
 featuredimage_alt: "Imagem de cabeçalho"
 tags:
   - mongodb
+  - terraform
 # slidesurl: 'http://academicpages.github.io/files/slides2.pdf'
 # paperurl: 'http://academicpages.github.io/files/paper2.pdf'
 ---
