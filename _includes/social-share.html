@@ -9,15 +9,16 @@
 
   <a href="https://twitter.com/intent/tweet?text={{ base_path }}{{ page.url }}" class="btn btn--twitter" title="{{ site.data.ui-text[site.locale].share_on_label | default: 'Share on' }} Twitter"><i class="fab fa-x-twitter" aria-hidden="true"></i><span> X</span></a>
 
-  
   <button class="btn btn--copy-link" id="copyLinkButton" title="Copy Page Link"><i class="fas fa-copy" aria-hidden="true"></i><span> Copy Link</span>
-    <div id="copySuccessMessage" class="copy-success-message">Link copied successfully!</div>
+    <div id="copySuccessMessage" class="copy-success-message" style="display:none;">Link copied successfully!</div>
   </button>
 </section>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
       var copyLinkButton = document.getElementById('copyLinkButton');
+      var copySuccessMessage = document.getElementById('copySuccessMessage'); // Seleciona o elemento correto
+
       copyLinkButton.addEventListener('click', function() {
           var pageUrl = '{{ base_path }}{{ page.url }}'; // Obtém o URL da página atual
           var tempInput = document.createElement('input');
