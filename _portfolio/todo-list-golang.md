@@ -20,10 +20,9 @@ Todo List in Golang is a simple yet powerful Todo List application implemented i
 git clone https://github.com/SamuelMolling/todo-list-golang.git
 cd todo-list-golang
 ```
-2. **MongoDB Configuration:** Set up your public and private keys for MongoDB Atlas.
+2. **MongoDB Configuration:** Set up your cluster and configure your connection string on line 32.
 ```bash
-export ATLAS_PUBLIC_KEY=<your-public-key>
-export ATLAS_PRIVATE_KEY=<your-private-key>
+mongoURI := "mongodb+srv://<USERNAME>:<PASSWORD>@<CLUTER_ENDPOINT>/?retryWrites=true&w=majority&appName=demo1"
 ```
 3. Run the Application: Execute the following command to start the server.
 ```bash
