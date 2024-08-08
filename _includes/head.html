@@ -13,6 +13,33 @@
 
 <script>
   document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var copyLinkButton = document.getElementById('copyLinkButton');
+    var copySuccessMessage = document.getElementById('copySuccessMessage');
+
+    if (copyLinkButton && copySuccessMessage) {
+      copyLinkButton.addEventListener('click', function() {
+        var pageUrl = '{{ base_path }}{{ page.url }}';
+
+        // Verifica se o URL não está vazio
+        if (pageUrl) {
+          navigator.clipboard.writeText(pageUrl).then(function() {
+            copySuccessMessage.style.display = 'block';
+            setTimeout(function() {
+              copySuccessMessage.style.display = 'none';
+            }, 3000); // Esconde após 3 segundos (3000 milissegundos)
+          }).catch(function(err) {
+            console.error('Failed to copy text: ', err);
+          });
+        } else {
+          console.error('Page URL is empty');
+        }
+      });
+    } else {
+      console.error('Copy link button or success message element not found');
+    }
+  });
 </script>
 
 <!-- For all browsers -->

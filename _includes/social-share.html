@@ -13,28 +13,3 @@
     <div id="copySuccessMessage" class="copy-success-message" style="display:none;">Link copied successfully!</div>
   </button>
 </section>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-      var copyLinkButton = document.getElementById('copyLinkButton');
-      var copySuccessMessage = document.getElementById('copySuccessMessage'); // Seleciona o elemento correto
-
-      copyLinkButton.addEventListener('click', function() {
-          var pageUrl = '{{ base_path }}{{ page.url }}'; // Obtém o URL da página atual
-          var tempInput = document.createElement('input');
-          tempInput.value = pageUrl;
-          document.body.appendChild(tempInput);
-          tempInput.select();
-          document.execCommand('copy');
-          document.body.removeChild(tempInput);
-
-          // Mostrar mensagem de sucesso
-          copySuccessMessage.style.display = 'block';
-
-          // Esconder a mensagem após alguns segundos (opcional)
-          setTimeout(function() {
-              copySuccessMessage.style.display = 'none';
-          }, 3000); // Esconde após 3 segundos (3000 milissegundos)
-      });
-  });
-</script>
