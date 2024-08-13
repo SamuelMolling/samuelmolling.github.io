@@ -135,6 +135,9 @@
       {% if author.credly %}
       <li><a href="https://www.credly.com/users/{{ author.credly }}"><i class="fab fa-fw fa-credly icon-pad-right" aria-hidden="true"></i>Credly</a></li>
       {% endif %}
+      {% if author.upwork %}
+      <li><a href="https://www.upwork.com/freelancers/{{ author.upwork }}"><i class="fab fa-fw fa-upwork icon-pad-right" aria-hidden="true"></i>Upwork</a></li>
+      {% endif %}
       {% if author.twitter %}
         <li><a href="https://twitter.com/{{ author.twitter }}"><i class="fab fa-fw fa-x-twitter icon-pad-right" aria-hidden="true"></i>X</a></li>
       {% endif %}
