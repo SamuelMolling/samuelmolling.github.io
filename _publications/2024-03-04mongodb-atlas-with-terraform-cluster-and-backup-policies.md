@@ -12,7 +12,7 @@ tags:
   - mongodb
   - terraform
 ---
-In this tutorial, I will show you how to create a MongoDB cluster in Atlas using Terraform. We saw in a [previous article](https://gschmitto.github.io/publications/mongodb-atlas-with-terraform) how to create an API key to start using Terraform and create our first project module. Now, we will go ahead and create our first cluster. If you don't have an API key and a project, I recommend you look at the previous article.
+In this tutorial, I will show you how to create a MongoDB cluster in Atlas using Terraform. We saw in a [previous article](https://samuelmolling.github.io/publications/mongodb-atlas-with-terraform) how to create an API key to start using Terraform and create our first project module. Now, we will go ahead and create our first cluster. If you don't have an API key and a project, I recommend you look at the previous article.
 
 This article is for anyone who intends to use or already uses infrastructure as code (IaC) on the MongoDB Atlas platform or wants to learn more about it.
 

@@ -14,7 +14,7 @@ tags:
   - vault
 ---
 In this tutorial, I will show how to create a user for the MongoDB database in Atlas using Terraform and how to store this credential securely in HashiCorp Vault. We saw in the previous article, 
-MongoDB Atlas With Terraform - Cluster and Backup Policies(https://gschmitto.github.io/publications/mongodb-atlas-with-terraform-cluster-and-backup-policies), how to create a cluster with configured backup policies. Now, we will go ahead and create our first user. If you haven't seen the previous articles, I suggest you look to understand how to get started.
+MongoDB Atlas With Terraform - Cluster and Backup Policies(https://samuelmolling.github.io/publications/mongodb-atlas-with-terraform-cluster-and-backup-policies), how to create a cluster with configured backup policies. Now, we will go ahead and create our first user. If you haven't seen the previous articles, I suggest you look to understand how to get started.
 
 This article is for anyone who intends to use or already uses infrastructure as code (IaC) on the MongoDB Atlas platform or wants to learn more about it.
 
@@ -26,7 +26,7 @@ Everything we do here is contained in the provider/resource documentation:
 > Note: We will not use a backend file. However, for productive implementations, it is extremely important and safer to store the state file in a remote location such as an S3, GCS, Azurerm, etc…
 
 ## Creating a User
-At this point, we will create our first user using Terraform in MongoDB Atlas and store the URI to connect to my cluster in HashiCorp Vault. For those unfamiliar, [HashiCorp Vault](https://www.hashicorp.com/products/vault) is a secrets management tool that allows you to securely store, access, and manage sensitive credentials such as passwords, API keys, certificates, and more. It is designed to help organizations protect their data and infrastructure in complex, distributed IT environments. In it, we will store the connection URI of the user that will be created with the cluster we created in the [last article](https://gschmitto.github.io/publications/mongodb-atlas-with-terraform-cluster-and-backup-policies).
+At this point, we will create our first user using Terraform in MongoDB Atlas and store the URI to connect to my cluster in HashiCorp Vault. For those unfamiliar, [HashiCorp Vault](https://www.hashicorp.com/products/vault) is a secrets management tool that allows you to securely store, access, and manage sensitive credentials such as passwords, API keys, certificates, and more. It is designed to help organizations protect their data and infrastructure in complex, distributed IT environments. In it, we will store the connection URI of the user that will be created with the cluster we created in the [last article](https://samuelmolling.github.io/publications/mongodb-atlas-with-terraform-cluster-and-backup-policies).
 
 Before we begin, make sure that all the prerequisites mentioned in the previous article are properly configured: Install [Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli), create an API key in MongoDB Atlas, and set up a project and a cluster in Atlas. These steps are essential to ensure the success of creating your database user.
 

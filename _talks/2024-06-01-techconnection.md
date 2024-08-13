@@ -6,7 +6,7 @@ permalink: /talks/2024-06-01-techconnection
 venue: "Tech Connection"
 date: 2024-06-01
 location: "Balneário Camboriú, SC, Brazil"
-slidesurl: "http://gschmitto.github.io/files/index-query-insights-and-atlas-search-techconnection.pdf"
+slidesurl: "http://samuelmolling.github.io/files/index-query-insights-and-atlas-search-techconnection.pdf"
 tags:
   - mongodb
 ---

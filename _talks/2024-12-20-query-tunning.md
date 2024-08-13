@@ -6,7 +6,7 @@ permalink: /talks/2024-12-20-query-tunning
 venue: "Tech Talks"
 date: 2023-12-20
 location: "Remote"
-slidesurl: "http://gschmitto.github.io/files/query-tunning-agilize.pdf"
+slidesurl: "http://samuelmolling.github.io/files/query-tunning-agilize.pdf"
 tags:
   - mysql
   - postgresql
