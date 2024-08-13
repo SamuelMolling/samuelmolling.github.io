@@ -15,35 +15,30 @@
   document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
 
   document.addEventListener('DOMContentLoaded', function() {
-  var copyLinkButton = document.getElementById('copyLinkButton');
-  var copySuccessMessage = document.getElementById('copySuccessMessage');
+    var copyLinkButton = document.getElementById('copyLinkButton');
+    var copySuccessMessage = document.getElementById('copySuccessMessage');
 
-  console.log('Button:', copyLinkButton);
-  console.log('Success Message:', copySuccessMessage);
+    if (copyLinkButton && copySuccessMessage) {
+      copyLinkButton.addEventListener('click', function() {
+        var pageUrl = '{{ base_path }}{{ page.url }}';
 
-  if (copyLinkButton && copySuccessMessage) {
-    copyLinkButton.addEventListener('click', function() {
-      var pageUrl = '{{ base_path }}{{ page.url }}';
-      console.log('Page URL:', pageUrl);
-
-      if (pageUrl) {
-        navigator.clipboard.writeText(pageUrl).then(function() {
-          copySuccessMessage.style.display = 'block';
-          setTimeout(function() {
-            copySuccessMessage.style.display = 'none';
-          }, 3000);
-        }).catch(function(err) {
-          console.error('Failed to copy text: ', err);
-        });
-      } else {
-        console.error('Page URL is empty');
-      }
-    });
-  } else {
-    console.error('Copy link button or success message element not found');
-  }
-});
-
+        if (pageUrl) {
+          navigator.clipboard.writeText(pageUrl).then(function() {
+            copySuccessMessage.style.display = 'block';
+            setTimeout(function() {
+              copySuccessMessage.style.display = 'none';
+            }, 3000);
+          }).catch(function(err) {
+            console.error('Failed to copy text: ', err);
+          });
+        } else {
+          console.error('Page URL is empty');
+        }
+      });
+    } else {
+      console.error('Copy link button or success message element not found');
+    }
+  });
 </script>
 
 <!-- For all browsers -->
