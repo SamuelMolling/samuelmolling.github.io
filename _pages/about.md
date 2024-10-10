@@ -19,9 +19,6 @@ I also run a consultancy firm, SM Consulting, where I provide support to compani
 - **Talks:** Information about the talks and workshops I've conducted, covering topics such as qdatabases, security, artificial intelligence, cloud solutions, IaC, and more.
 - **CV:** My professional experience, education, certifications, and skills.
 
-## Latest Updates 📅
-Check out my recent event at the MongoDB User Group in Florianópolis, SC, Brazil, where I presented on Atlas Search and Vector Search with MongoDB. See the slides and materials available in the Talks section.
-
 ## Let's Connect! 🤝
 I'm always open to new opportunities and collaborations. If you have an interesting project or want to discuss technology, feel free to reach out. Let's build something amazing together!
 
