@@ -1,6 +1,6 @@
 ---
 title: "AutoScaling MongoDB Atlas"
-excerpt: "Code for autoscaling MongoDB Atlas clusters based on a schedule. <br/><img src='/images/portfolio/golang-shirt-mongo.png' style='width:300px;'>"
+excerpt: "Code for autoscaling MongoDB Atlas clusters based on a schedule. <br/><img src='/images/portfolio/autoscaling-mongo.png' style='width:300px;'>"
 collection: portfolio
 tags:
   - mongodb
