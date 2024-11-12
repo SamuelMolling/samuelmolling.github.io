@@ -6,7 +6,7 @@ excerpt: 'In this article, we explore how to implement in-use encryption in Mong
 date: 2024-11-11
 # venue: 'MongoDB Developer Center'
 # paperurl: 'https://www.mongodb.com/developer/products/atlas/mongodb-atlas-with-terraform'
-featuredimage: /images/mongodb-atlas-with-terraform/cabecalho.png
+featuredimage: /images/mongodb-execution-encryption/title.png
 featuredimage_alt: "Imagem de cabeçalho"
 tags:
   - mongodb
