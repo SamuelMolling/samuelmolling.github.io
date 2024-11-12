@@ -1,7 +1,7 @@
 ---
 title: "Encryption in-use: Using CSFLE and Queryable Encryption with Golang"
 collection: publications
-permalink: /publications/mongodb-atlas-with-terraform
+permalink: /publications/mongodb-execution-encryption-go
 excerpt: 'In this article, we explore how to implement in-use encryption in MongoDB using Golang, focusing on two main approaches: Client-Side Field Level Encryption (CSFLE) and Queryable Encryption. Through a practical script in Golang, we demonstrate how to secure sensitive data, such as employee salary and personal information, ensuring protection throughout the data lifecycle. We cover the differences between CSFLE and Queryable Encryption, highlighting the types of queries each supports and when to use them.'
 date: 2024-11-11
 # venue: 'MongoDB Developer Center'
