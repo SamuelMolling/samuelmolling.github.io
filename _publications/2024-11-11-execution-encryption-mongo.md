@@ -123,7 +123,7 @@ Define the variables for the MongoDB connection string, database, and collection
 > **Note**: Replace `<user>` and `<pass>` with your MongoDB Atlas username and password. In the *GetAutoEncryptionOptions function*, replace the path to the shared encryption library with the correct path on your system.
 
 ```go
-   uri := "mongodb+srv://<user>:<pass>@cluster0.ag6bk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+   uri := "<URI>"
    keyVaultDatabaseName := "encryption"
    keyVaultCollectionName := "__keyVault"
    keyVaultNamespace := keyVaultDatabaseName + "." + keyVaultCollectionName
@@ -340,7 +340,7 @@ func setupKMSProviders(localMasterKey string) map[string]map[string]interface{} 
 	}
 }
 
-uri := "mongodb+srv://<user>:<pass>@demo1.f7x641l.mongodb.net/?retryWrites=true&w=majority&appName=demo1"
+uri := "<URI>"
 localMasterKey := "<YOUR KEY>"
 kmsProviders := setupKMSProviders(localMasterKey)
 keyVaultNamespace := "encryption.__keyVault"
