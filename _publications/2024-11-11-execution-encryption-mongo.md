@@ -13,7 +13,7 @@ tags:
   - golang
   - security
 ---
-# In-Use Encryption: Using CSFLE and Queryable Encryption with Golang
+# Resume
 
 With rising privacy regulations and the need to protect sensitive data, MongoDB provides two advanced encryption solutions that ensure robust security and flexible querying capabilities: **Client-Side Field Level Encryption (CSFLE)** and **Queryable Encryption**. Both options offer end-to-end protection, but they differ significantly in how they encrypt data and the types of queries they support. This article explores the differences between CSFLE and Queryable Encryption, explains how to use them, and demonstrates their implementation in Golang.
 
