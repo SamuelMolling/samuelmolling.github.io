@@ -53,7 +53,9 @@ The following table shows which MongoDB editions support CSFLE and Queryable Enc
 | MongoDB Enterprise Advanced| Yes                          | Yes                         |
 | MongoDB Community Edition  | No                           | Yes                         |
 
-Download the Shared Encryption Library from [MongoDB's Shared Library for CSFLE](https://www.mongodb.com/pt-br/docs/v7.0/core/csfle/reference/shared-library/#std-label-csfle-reference-shared-library-download).
+Download the Shared Encryption Library from [MongoDB's Shared Library for CSFLE](https://www.mongodb.com/pt-br/docs/v8.0/core/csfle/reference/shared-library/#std-label-csfle-reference-shared-library-download).
+
+> **Note**: The MongoDB needs to be version 8.0 or higher to support Queryable Encryption with range queries.
 
 Install the Golang module:
 ```bash
@@ -118,7 +120,7 @@ func loadLocalMasterKey(filename string) string {
 #### Define the variables
 Define the variables for the MongoDB connection string, database, and collection names, as well as the key vault namespace and KMS providers.
 
-> Note: Replace `<user>` and `<pass>` with your MongoDB Atlas username and password. In the *GetAutoEncryptionOptions function*, replace the path to the shared encryption library with the correct path on your system.
+> **Note**: Replace `<user>` and `<pass>` with your MongoDB Atlas username and password. In the *GetAutoEncryptionOptions function*, replace the path to the shared encryption library with the correct path on your system.
 
 ```go
    uri := "mongodb+srv://<user>:<pass>@cluster0.ag6bk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
@@ -320,7 +322,7 @@ searchBySalaryRange(coll, 150000, 200000)
 
 ![](/images/mongodb-execution-encryption/result-query-encryption.png)
 
-As we can see, in version 8, I can also do this with data ranges.
+As we can see, in MongoDB version 8, I can also do this with data ranges.
 
 You can check the entire code in the [GitHub repository](https://github.com/SamuelMolling/mongodb-lab/blob/main/queryable-encryption/main.go) and more informations in the [MongoDB documentation](https://www.mongodb.com/docs/manual/core/queryable-encryption/).
 
@@ -329,7 +331,7 @@ You can check the entire code in the [GitHub repository](https://github.com/Samu
 #### Define the variables
 Define the variables for the MongoDB connection string, database, and collection names, as well as the key vault namespace and KMS providers.
 
-> Note: Replace `<user>` and `<pass>` with your MongoDB Atlas username and password. In the *GetAutoEncryptionOptions function*, replace the path to the shared encryption library with the correct path on your system.
+> **Note**: Replace `<user>` and `<pass>` with your MongoDB Atlas username and password. In the *GetAutoEncryptionOptions function*, replace the path to the shared encryption library with the correct path on your system.
 
 ```go
 func setupKMSProviders(localMasterKey string) map[string]map[string]interface{} {
