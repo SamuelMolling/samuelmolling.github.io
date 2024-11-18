@@ -21,15 +21,15 @@ With rising privacy regulations and the need to protect sensitive data, MongoDB 
 
 Before exploring the differences between CSFLE and Queryable Encryption, here are the primary encryption methods offered by MongoDB:
 
-- **Encryption in Transit**: Secures data in motion by encrypting client-server traffic with TLS/SSL. This method is essential for protecting data during network transmission.
-- **Encryption at Rest**: Secures data stored on disk, available in MongoDB Enterprise Advanced and Atlas versions. This method ensures data remains protected even in the event of server breaches.
+- **Encryption in Transit**: Secures data in motion by encrypting client-server traffic with TLS/SSL. This method is essential for protecting data during network transmission. Also, all communications between nodes and processes are also encrypted with TLS, ensuring comprehensive security for data in motion.
+- **Encryption at Rest**: Encryption at Rest: Encryption at rest secures data stored on disk, available in MongoDB Enterprise Advanced and Atlas versions. This approach protects data even if an adversary gains access to the disk or underlying database files, ensuring confidentiality beyond just server security.
 - **Encryption In-Use**: Protects data at all stages of its lifecycle—transmission, storage, and processing. MongoDB offers two approaches for in-use encryption: **Queryable Encryption** and **Client-Side Field Level Encryption (CSFLE)**.
 
 ## Differences between CSFLE and Queryable Encryption
 
 ### Encryption Method and Inference Security
-- **CSFLE**: Uses deterministic encryption for fields that require equality queries, producing identical ciphertexts for identical values. This allows exact match queries but can expose low-cardinality data to inference attacks, where patterns may be identified if values have few variations.
-- **Queryable Encryption**: Adopts random encryption, generating unique ciphertexts for identical values, making inference attacks more difficult. This approach supports equality queries and, from MongoDB 8.0 onward, range queries using operators like `$lt`, `$lte`, `$gt`, and `$gte`, making it more robust against low-cardinality data inference.
+- **CSFLE**: Uses deterministic encryption for fields needing equality queries, producing identical ciphertexts for identical values. This enables exact match queries but can lead to significant information leakage in some cases, as patterns may emerge, especially with low-cardinality data.
+- **Queryable Encryption**: Uses non-deterministic encryption, generating unique ciphertexts for identical values, making attacks more difficult. This approach supports equality queries and, from MongoDB 8.0 onward, range queries using operators like $lt, $lte, $gt, and $gte.
 
 ### Supported Query Types
 - **CSFLE**: Supports only exact match (equality) queries on deterministically encrypted fields, suitable for scenarios that don’t require complex query operations. This limitation makes CSFLE ideal for cases where equality is the only required query type.
