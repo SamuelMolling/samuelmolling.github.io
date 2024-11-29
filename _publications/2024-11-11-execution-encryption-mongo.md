@@ -214,60 +214,6 @@ defer clientEncryption.Close(context.Background())
 Configure the key vault and create the encrypted collection with `CreateEncryptedCollection`.
 
 ```go
-func (ce *ClientEncryption) CreateEncryptedCollection(ctx context.Context,
-	db *Database, coll string, createOpts *options.CreateCollectionOptions,
-	kmsProvider string, masterKey interface{}) (*Collection, bson.M, error) {
-	if createOpts == nil {
-		return nil, nil, errors.New("nil CreateCollectionOptions")
-	}
-	ef := createOpts.EncryptedFields
-	if ef == nil {
-		return nil, nil, errors.New("no EncryptedFields defined for the collection")
-	}
-
-	efBSON, err := marshal(ef, db.bsonOpts, db.registry)
-	if err != nil {
-		return nil, nil, err
-	}
-	r := bsonrw.NewBSONDocumentReader(efBSON)
-	dec, err := bson.NewDecoder(r)
-	if err != nil {
-		return nil, nil, err
-	}
-	var m bson.M
-	err = dec.Decode(&m)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if v, ok := m["fields"]; ok {
-		if fields, ok := v.(bson.A); ok {
-			for _, field := range fields {
-				if f, ok := field.(bson.M); !ok {
-					continue
-				} else if v, ok := f["keyId"]; ok && v == nil {
-					dkOpts := options.DataKey()
-					if masterKey != nil {
-						dkOpts.SetMasterKey(masterKey)
-					}
-					keyid, err := ce.CreateDataKey(ctx, kmsProvider, dkOpts)
-					if err != nil {
-						createOpts.EncryptedFields = m
-						return nil, m, err
-					}
-					f["keyId"] = keyid
-				}
-			}
-			createOpts.EncryptedFields = m
-		}
-	}
-	err = db.CreateCollection(ctx, coll, createOpts)
-	if err != nil {
-		return nil, m, err
-	}
-	return db.Collection(coll), m, nil
-}
-
 createCollectionOptions := options.CreateCollection().SetEncryptedFields(encryptedFieldsMap)
 _, _, err = clientEncryption.CreateEncryptedCollection(
     context.TODO(),
