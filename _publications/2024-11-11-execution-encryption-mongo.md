@@ -41,7 +41,7 @@ Before exploring the differences between CSFLE and Queryable Encryption, here ar
 
 ## Implementing CSFLE and Queryable Encryption in Golang
 
-To demonstrate the implementation, we’ll create a simple Golang application to securely manage employee information, storing and querying sensitive data (such as names and salaries) using MongoDB's advanced encryption.
+To demonstrate the implementation, well create a simple Golang application to securely manage employee information, storing and querying sensitive data (such as names and salaries) using MongoDB's advanced encryption.
 
 ### Prerequisites
 
