@@ -15,11 +15,15 @@ Education
 
 Work experience
 ======
-* Founder, SM Consulting
-  * Sep 2023 - Present
+* Senior Database Reliability Engineer, Fireflies.ai
+  * Abr 2025 - Present
+  * Location: San Francisco, CA
+
+* Founder, Goat IT
+  * Aug 2023 - Present
   * Location: Campo Bom, Brazil
   
-    As the Founder of SM Consulting, I lead a team of experts in providing consultancy services to companies seeking to optimize, automate, and scale their IT operations. Our consultancy services are tailored to each client's unique needs, focusing on delivering solutions that enhance performance, drive innovation, and ensure the reliability and scalability of their IT systems.
+    As the Founder of Goat IT, I lead a team of experts in providing consultancy services to companies seeking to optimize, automate, and scale their IT operations. Our consultancy services are tailored to each client's unique needs, focusing on delivering solutions that enhance performance, drive innovation, and ensure the reliability and scalability of their IT systems.
 
     We specialize in database technologies, Infrastructure as Code (IaC), cloud platforms, artificial intelligence, software engineering, and various other technologies. Our team of professionals brings a wealth of experience and expertise to each project, working closely with clients to understand their requirements and develop customized solutions that meet their specific goals and objectives.
 
@@ -28,7 +32,7 @@ Work experience
     By leveraging our deep industry knowledge, technical skills, and innovative approach, we help our clients stay ahead of the curve and adapt to the rapidly evolving technology landscape. Our focus on collaboration, innovation, and excellence sets us apart and enables us to deliver exceptional results for our clients.
 
 * Staff Database Reliability Engineer, PicPay
-  * Sep 2023 - Present
+  * Sep 2023 - Mar 2025
   * Location: São Paulo, Brazil
   
     As a Staff Database Reliability Engineer (DBRE) at PicPay, I work with my team to create guardrails and CI/CD pipelines for databases, using tools like Terraform, Atlantis Pipeline, Tekton, GitHub Actions, and Backstage. Our goal is to deliver cloud infrastructure as a platform, incorporating guardrails, best practices, standard configurations, and pre-set user permissions. This enables developers to create and use the platform directly through Backstage.
