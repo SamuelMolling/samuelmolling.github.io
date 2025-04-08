@@ -4,7 +4,7 @@ collection: publications
 permalink: /publications/mongodb-resource-policy
 excerpt: 'In this article, we explore how to implement governance and enforce security standards in MongoDB Atlas using Resource Policies. Introduced in April 2025, this feature allows organizations to define declarative rules that restrict insecure configurations, such as public IP exposure or usage of unsupported cloud regions. Through practical examples with Terraform, we demonstrate how to apply policies that control TLS versions, cloud provider access, and more — ensuring compliance is automated and auditable across environments.'
 date: 2025-04-08
-venue: 'MongoDB Developer Center'
+venue: 'Personal website'
 # paperurl: 'https://www.mongodb.com/developer/products/atlas/mongodb-atlas-with-terraform'
 featuredimage: /images/mongodb-resource-policy/logo.png
 featuredimage_alt: "Imagem de cabeçalho"
