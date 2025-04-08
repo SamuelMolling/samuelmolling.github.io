@@ -1,8 +1,8 @@
 ---
-title: "Impondo Governança no MongoDB Atlas com Resource Policies"
+title: "Enforcing Governance in MongoDB Atlas with Resource Policies"
 collection: publications
 permalink: /publications/mongodb-resource-policy
-excerpt: 'In this article, we explore how to implement in-use encryption in MongoDB using Golang, focusing on two main approaches: Client-Side Field Level Encryption (CSFLE) and Queryable Encryption. Through a practical script in Golang, we demonstrate how to secure sensitive data, such as employee salary and personal information, ensuring protection throughout the data lifecycle. We cover the differences between CSFLE and Queryable Encryption, highlighting the types of queries each supports and when to use them.'
+excerpt: 'In this article, we explore how to implement governance and enforce security standards in MongoDB Atlas using Resource Policies. Introduced in April 2025, this feature allows organizations to define declarative rules that restrict insecure configurations, such as public IP exposure or usage of unsupported cloud regions. Through practical examples with Terraform, we demonstrate how to apply policies that control TLS versions, cloud provider access, and more — ensuring compliance is automated and auditable across environments.'
 date: 2025-04-08
 venue: 'MongoDB Developer Center'
 # paperurl: 'https://www.mongodb.com/developer/products/atlas/mongodb-atlas-with-terraform'
