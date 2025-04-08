@@ -11,7 +11,7 @@ featuredimage_alt: "Imagem de cabeçalho"
 tags:
   - mongodb
   - security
-  - govarnance
+  - governance
 ---
 ## Summary
 
