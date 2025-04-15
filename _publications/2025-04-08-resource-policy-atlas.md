@@ -15,7 +15,7 @@ tags:
 ---
 ## Summary
 
-The growing adoption of MongoDB Atlas as a managed database platform increasingly demands mechanisms that align security, compliance, and standardization. In April 2025, MongoDB introduced a critical feature for this purpose: [**Resource Policies**](https://www.mongodb.com/en-us/docs/atlas/atlas-resource-policies/).
+The growing adoption of MongoDB Atlas as a managed database platform increasingly demands mechanisms that align security, compliance, and governance. In April 2025, MongoDB introduced a critical feature for this purpose: [**Resource Policies**](https://www.mongodb.com/en-us/docs/atlas/atlas-resource-policies/).
 
 This article presents the concept and capabilities of Resource Policies, highlights their importance in enterprise environments, and demonstrates how to use them effectively via Terraform — ensuring that essential configurations rely not only on best practices but also on enforceable and auditable constraints.
 
@@ -23,7 +23,7 @@ This article presents the concept and capabilities of Resource Policies, highlig
 
 **Resource Policies** are organization-level rules in Atlas that are automatically enforced across all projects and clusters under that organization. Their goal is straightforward yet powerful: to restrict specific actions or configurations that could compromise security, increase costs, or violate compliance standards.
 
-These policies are defined using the [Cedar](https://docs.cedarpolicy.com/) language, adopted by MongoDB for its concise and expressive syntax. Its declarative structure allows for clear and precise specification of forbidden actions based on the resource context — including cluster configuration, networking parameters, associated projects, and security requirements such as minimum TLS versions.
+These policies are defined using the AWS open-source [Cedar](https://docs.cedarpolicy.com/) policy language, adopted by MongoDB for its concise and expressive syntax. Its declarative structure allows for clear and precise specification of forbidden actions based on the resource context — including cluster configuration, networking parameters, associated projects, and security requirements such as minimum TLS versions.
 
 ## Why Use Them?
 
@@ -44,9 +44,9 @@ Among the constraints currently supported by **Resource Policies**, the followin
 
 - **Cloud provider restrictions**: allow or block cluster creation on AWS, GCP, or Azure;
 - **Region limitations**: restrict usage to specific geographic zones;
-- **Public IP bans**: block `0.0.0.0/0` to prevent exposure to the internet;
+- **Wildcard IP bans**: block `0.0.0.0/0` to prevent exposure to the internet;
 - **VPC peering or private endpoint enforcement**;
-- **Autoscaling limits**: prevent instance sizes below M30 or above M60;
+- **Cluster size limits**: prevent instance sizes below M30 or above M60;
 - **Maintenance window requirements** at the project level;
 - **TLS-related rules**: enforce minimum TLS version or cipher suite configurations.
 
