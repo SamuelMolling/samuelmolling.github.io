@@ -239,7 +239,7 @@ I use two charts, published as OCI artifacts and pulled by Argo CD.
 
 The **platform chart** is the API. It renders one provider package per AWS service, the `ProviderConfig`, an `EnvironmentConfig`, and an XRD plus a Composition for each resource kind the company is willing to offer: IRSA, KMS, S3, Secrets Manager, SNS, SQS. I pin the upstream Crossplane chart to an exact version. I let the chart we publish float on a patch range such as `0.4.*`. A patch rolls forward on the next sync, to every cluster the generator matches. That is fast, and a bad publish is an incident at the same speed. The upstream control-plane chart stays exact for that reason.
 
-The **app chart** is what service authors render. One values file describes the workload (image, ports, probes, resources, routes). Another describes cloud resources under `infrastructure:`. The chart emits the Deployment, Service, HPA, PDB, routes, ExternalSecret, and ServiceAccount, and it emits one claim per entry. A small library chart holds the IRSA fragment so every resource template does not reinvent the role.
+The **app chart** is what service authors render. One values file describes the workload (image, ports, probes, resources, routes, and who the process may talk to). Another describes cloud resources under `infrastructure:`. The chart emits the Deployment, Service, HPA, PDB, routes, ExternalSecret, ServiceAccount, and the NetworkPolicies described below, and it emits one claim per entry. A small library chart holds the IRSA fragment so every resource template does not reinvent the role.
 
 Compositions need the account, the region, the VPC, the private subnets, the OIDC issuer, and the boundary ARN. Those values do not belong in a claim, and I do not hardcode them in the Composition. Crossplane is denied the state bucket, so it cannot look them up either. The hand-off is a values file in the GitOps repository, filled from Terraform outputs and rendered into an `EnvironmentConfig`:
 
@@ -369,6 +369,140 @@ Waves on an Application order Applications. Waves on a resource order objects in
 | XRDs and Compositions | 10 | the environment object and the functions |
 
 Claims arrive with the service Application, after the XRD exists. I set `SkipDryRunOnMissingResource` on provider objects, and I turn server-side apply off for the objects that reject it. Copy the wave numbers and forget those annotations, and the first sync is red again.
+
+## NetworkPolicy the developer never writes
+
+The same app chart is what makes network policy feel small. A service author lists who may connect and where the process may connect. The template turns that list into a default-deny policy plus explicit allows, in the app namespace, on every environment the ApplicationSet targets.
+
+This is the whole interface I want them to see:
+
+```yaml
+# deploy/values.yaml
+networkPolicy:
+  ingress:
+    fromNamespaces:
+      - gateway          # the shared ingress namespace
+    fromApps:
+      - checkout         # another app namespace, labeled workloads=true
+  egress:
+    allowDNS: true
+    toApps:
+      - name: payments
+        ports: [8080]
+```
+
+`fromNamespaces` is a platform namespace that is allowed to call in, typically the gateway. `fromApps` is another service onboarded the same way, so its namespace carries `workloads=true` and is named after the repository. `allowDNS` is the baseline almost every pod needs. `toApps` is egress to a specific service, with the ports the caller actually uses. There is no `podSelector`, no `policyTypes`, and no `ipBlock` in the values file.
+
+With `networkPolicy` left at the chart defaults, the release still renders a default-deny. DNS is allowed unless the values set `allowDNS: false`. Same-namespace traffic is allowed, because the pods of one service have to reach each other. Everything else waits for a line in this file.
+
+For a service named `billing`, the chart renders two objects in the `billing` namespace.
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: billing-default-deny
+  namespace: billing
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: billing-allow
+  namespace: billing
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: gateway
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: checkout
+              workloads: "true"
+  egress:
+    # pods of this service, same namespace
+    - to:
+        - podSelector: {}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: payments
+              workloads: "true"
+      ports:
+        - { protocol: TCP, port: 8080 }
+```
+
+`podSelector: {}` means every pod in that namespace. That is safe here because the namespace belongs to one Application. The ApplicationSet creates it and labels it `workloads=true`. An empty `podSelector` on the deny policy selects all of them. Kubernetes unions policies, so the allow policy adds flows on top of the deny. An empty `ingress` list denies ingress. An allow-all is the different shape, `ingress: [{}]`, and the template never emits it.
+
+The template that produces the allow rules stays in the chart. A shortened form:
+
+```yaml
+{{- range .Values.networkPolicy.ingress.fromNamespaces }}
+- from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ . | quote }}
+{{- end }}
+{{- range .Values.networkPolicy.ingress.fromApps }}
+- from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ . | quote }}
+          workloads: "true"
+{{- end }}
+{{- if .Values.networkPolicy.egress.allowDNS | default true }}
+- to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+  ports:
+    - { protocol: UDP, port: 53 }
+    - { protocol: TCP, port: 53 }
+{{- end }}
+```
+
+The platform team owns that template. Service authors own the list of names.
+
+A few properties are why I put it in the shared chart.
+
+**Secure by default.** Every app namespace ships with default-deny. A new service is closed until someone lists a caller and a callee. Turning that off is a values change a reviewer can see. Forgetting an entry fails closed: the pod times out, and the fix is a line in git.
+
+**Consistent across apps and environments.** Staging and production render the same policies from the same template. A per-environment values file can add a caller that exists only in production. The shape of the policy does not change between clusters, and it does not change between the billing service and the payments service.
+
+**Reviewed in git.** The allow list is a pull request on `deploy/values.yaml`. "Who can call billing, and what billing can call" is a diff, not a `kubectl` session. Argo CD's prune removes an allow when the line is removed.
+
+**Authors skip the NetworkPolicy syntax.** Most service developers should not have to remember that a missing `namespaceSelector` means "this namespace," or that an empty `from` allows the world. They name a namespace or an app and, for egress, a port. The chart fills in selectors, DNS, and the deny.
+
+**The platform evolves the policy in one place.** When the DNS pods move labels, or when every service should also reach the metrics scraper, that change is a chart release. Argo CD rolls it to every app on the next sync. Nobody edits forty copies of a NetworkPolicy.
+
+Two limits belong in the open, because they are how NetworkPolicy actually works.
+
+The policy is namespace-scoped. The chart can allow billing to *receive* traffic from checkout, and it can allow billing to *open* traffic to payments. Checkout's own chart still has to allow that egress, and payments' chart still has to allow that ingress. An egress rule on the caller does not open the callee. I tell teams to update both values files in the same change, and to expect a timeout when only one side moved.
+
+The objects are inert until the cluster CNI enforces NetworkPolicy. That switch is foundation work, in the same Terraform stack that builds the cluster. Developers inherit enforcement. They do not turn it on per app.
 
 ## Argo CD discovers work by label
 
@@ -557,6 +691,8 @@ I recommend this pattern with the costs attached. Teams that adopt it and preten
 **Conventions are duplicated.** "Topic first, subscription on the queue" lives in the Terraform module and again in the XRD. The name prefix lives in the IAM policy and again in the Go template. Nothing generates one from the other. A sentence in the XRD is cheap insurance. When the module gains a required tag, the composition does not learn it until someone notices two styles of resource in the console.
 
 **Discovery is only as strict as the topic and the AppProject.** The generator will faithfully deploy a repository that should not have been labeled. Spend the time on who can apply `argocd-app`, and on what the `apps` project is allowed to create.
+
+**Default-deny is only half of a connection.** The app chart closes each namespace and opens what the values list. A call still needs an egress rule on the caller and an ingress rule on the callee. One-sided values produce a timeout, which is the signal that the other repository's list is stale. And the policies enforce nothing until the CNI, installed with the cluster, is set to enforce them.
 
 ## A management cluster is a later step
 
