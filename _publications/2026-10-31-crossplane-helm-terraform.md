@@ -27,7 +27,7 @@ The examples use placeholder names, account ids, and network ids. Copy the shape
 These are the outcomes I look for when a team adopts the pattern. The rest of the article is how each one is implemented, and where it bites.
 
 - **Developer self-service.** A service team adds a bucket, a queue, or a network allow in the repository they already own. For a resource the platform has published as a claim or a chart value, that is the whole change.
-- **Guardrails.** The claim author passes a short name such as `uploads`. The composition builds the cloud name, the account, and the region from the environment. NetworkPolicy defaults to deny. An AppProject keeps a service repository on workloads and claims.
+- **Guardrails.** The composition builds the cloud name, encryption, and tags. NetworkPolicy defaults to deny. An AppProject limits what a service repository may sync, and admission rejects privileged pods, floating image tags, and claims that try to pick their own composition.
 - **Clear ownership.** The foundation owns the network, the cluster, and the Argo CD install. Crossplane owns the objects that belong to one service and change on that service's schedule. Helm is the package on both sides of the platform API: the chart that publishes XRDs, and the chart that emits claims.
 - **Consistency across environments.** Staging and production run the same charts and the same compositions. What changes is an `EnvironmentConfig`: account, VPC, subnets, OIDC issuer. A queue named `orders` becomes `app-orders-staging` in one place and `app-orders-production` in another, from the same values file.
 - **Less ticket-ops.** A new service is a GitHub topic. A new cluster is a label. A new queue is a few lines of YAML. The tickets that remain are a new kind of cloud resource, or a change to the network and the cluster.
@@ -219,6 +219,8 @@ Waves on an Application order Applications. Waves on a resource order objects in
 | XRDs and Compositions | 10 | the environment object and the functions |
 
 Claims arrive with the service Application, after the XRD exists. I set `SkipDryRunOnMissingResource` on provider objects, and I turn server-side apply off for the objects that reject it. Copy the wave numbers and forget those annotations, and the first sync is red again.
+
+Waves order creation. Health decides when Argo CD is allowed to call the Application healthy. A claim whose AWS resource is still creating must stay `Progressing`. I map Crossplane's `Ready=True` condition into Argo CD's health check, so a green Application means the queue exists, not only that the YAML was applied.
 
 ## NetworkPolicy the developer never writes
 
@@ -494,7 +496,7 @@ namespace: crossplane-system
 wave: "1"
 ```
 
-Service Applications go to an AppProject named `apps`. Addon Applications go to a project named `addons`. That split is where I constrain a service repository to workloads and claims, and leave CRDs, providers, and cluster-scoped policy to the platform repository. The topic is a wide door. The AppProject is the frame around it.
+Service Applications go to an AppProject named `apps`. Addon Applications go to a project named `addons`. The topic is a wide door. The project, and the admission rules next to it, are the frame. Both are below.
 
 ### Why the label is the product
 
@@ -521,6 +523,168 @@ Anyone who can set a topic can onboard a repository. Decide who that is. Branch 
 The matrix multiplies. Forty services and three clusters is 120 Applications, which Argo CD handles comfortably. Four hundred services and ten clusters is a capacity conversation: controller memory, refresh interval, and how often the SCM provider lists the organization. I would rather have that conversation at design time than discover it as a stuck queue of reconciliations.
 
 A topic is also a coarse switch. It says "this repository is a service," not "this repository may deploy to production." When a company needs that second decision, I add a second topic or a path the filter requires, and I keep production as its own cluster label. I do not fork the ApplicationSet per team. The moment each team has a copy, the generator has stopped being the source of truth.
+
+## Guardrails around the self-service door
+
+Self-service is a wide door on purpose. The guardrails are what make the width safe. I keep them in the platform charts and in cluster policy, so a service author inherits them and a reviewer sees an exception as a values change.
+
+### AppProject and who may sync
+
+The `apps` project lists the chart registry and the organization as the only sources, allows destinations only on clusters the platform registered, and whitelists the kinds a service is allowed to create. Cluster-scoped kinds stay empty. CRDs, providers, and compositions belong to the `addons` project.
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: apps
+  namespace: argocd
+spec:
+  sourceRepos:
+    - ghcr.io/example/charts
+    - https://github.com/example/*
+  destinations:
+    - name: "*"
+      namespace: "*"
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - { group: "", kind: Service }
+    - { group: apps, kind: Deployment }
+    - { group: networking.k8s.io, kind: NetworkPolicy }
+    - { group: external-secrets.io, kind: ExternalSecret }
+    - { group: crossplane.example.com, kind: AWSSQSQueue }
+    - { group: crossplane.example.com, kind: AWSS3Bucket }
+  roles:
+    - name: service
+      groups: [app-developers]
+      policies:
+        - p, proj:apps:service, applications, get, apps/*, allow
+        - p, proj:apps:service, applications, sync, apps/*, allow
+```
+
+A developer can read and sync the Application the generator created for their repository. Updating the project, adding a kind, or pointing a source at an unknown registry is a platform change. That is the RBAC I want: the topic onboards the repo, and the project decides what the repo is allowed to become.
+
+### Pods, images, and admission
+
+Every app namespace is labeled for [Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/) at `restricted`, next to `workloads=true`. The ApplicationSet sets both labels when it creates the namespace, so a new service does not get a looser namespace than the last one. `restricted` already rejects privileged containers, root, and host namespaces.
+
+```yaml
+labels:
+  workloads: "true"
+  pod-security.kubernetes.io/enforce: restricted
+  pod-security.kubernetes.io/warn: restricted
+```
+
+I add a small admission policy on top, with Kyverno or Gatekeeper. Either tool is fine. The rules I actually enforce:
+
+- containers declare CPU and memory limits
+- `latest` and other floating tags are rejected; the image is a digest
+- the image is signed (cosign) by a key the platform trusts
+- a namespace labeled `workloads=true` has a default-deny NetworkPolicy before pods are admitted
+- claim kinds are the ones the platform chart publishes, and `compositionRef` is empty so a service cannot select a different composition
+
+The pod rule is the one worth showing. The others are the same policy object with a different `match`.
+
+```yaml
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: app-baseline
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: require-limits-and-digest
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaceSelector:
+                matchLabels:
+                  workloads: "true"
+      validate:
+        message: "set cpu and memory limits, and pin the image by digest"
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  limits:
+                    cpu: "?*"
+                    memory: "?*"
+                image: "*@sha256:*"
+```
+
+The values file carries the digest. The tag is for humans, in the pull request description, not in the spec the cluster runs:
+
+```yaml
+image:
+  repository: ghcr.io/example/files
+  digest: sha256:<digest>
+```
+
+Admission is also where a missing NetworkPolicy stops being a convention. The chart renders default-deny. The policy rejects pods in a `workloads=true` namespace that does not already have one. A hand-edited namespace cannot skip the chart and stay open.
+
+### Secrets stay out of git
+
+The app chart renders an `ExternalSecret`. The values file names the key in the secret store. It does not contain the secret.
+
+```yaml
+# deploy/values.yaml
+externalSecrets:
+  - name: api
+    key: billing/api
+```
+
+```yaml
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: billing-api
+  namespace: billing
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: cluster-store
+    kind: ClusterSecretStore
+  target:
+    name: api
+  dataFrom:
+    - extract:
+        key: billing/api
+```
+
+The store itself is an addon, aimed at the cloud secret manager, with credentials that live in the cluster. A pull request that pastes a password into `deploy/` should fail review, and admission can reject a `Secret` whose data did not come from that ExternalSecret if you want the rule to be mechanical. I start with the chart and review. I add the deny once someone bypasses the chart.
+
+### What the composition always sets
+
+Fields a claim author should not choose are absent from the XRD and set in the composition. Encryption, tags, and deletion behavior are the three I refuse to leave as a default of the cloud API.
+
+```yaml
+# inside the S3 composition, after the environment is loaded
+spec:
+  deletionPolicy: Orphan
+  forProvider:
+    region: {{`{{ $env.region }}`}}
+    serverSideEncryptionConfiguration:
+      - rules:
+          - applyServerSideEncryptionByDefault:
+              sseAlgorithm: aws:kms
+    tags:
+      managed-by: crossplane
+      environment: {{`{{ $env.environment }}`}}
+```
+
+`Orphan` on a bucket means deleting the claim does not delete the data. Queues use `Delete`, because a queue is cheap to recreate and dangerous to leave behind with a consumer still attached. I write that choice in the composition, per kind, and I say so in the XRD description. Tags make the cloud console answer "who manages this" without a lookup. Encryption is on even when the values file never mentions it.
+
+A claim that tries to set `compositionRef` is rejected by the admission rule above. The platform composition is the only implementation of the API.
+
+### What to watch
+
+The door is safe only while someone looks at the failures. These are the ones I put on a dashboard.
+
+- **Sync failures.** An Application in `SyncFailed` or stuck `Progressing` is usually a missing values file, an admission deny, or a wave that applied a claim before the XRD existed. The message on the Application is the first place to read.
+- **Claim reconcile errors.** `Synced=False` or `Ready=False` means the composition rendered an object the cloud rejected, the environment config is stale, or a dependency such as the topic is missing. A claim that retries forever is a name collision, a quota, or a field the XRD still allows and the cloud does not.
+- **Drift.** `selfHeal` puts the cluster back to git. It does not, by itself, notice an edit made in the cloud console. Crossplane's `Synced` condition does. I alert on that condition, not only on Argo CD being green.
+- **Open namespaces.** A `workloads=true` namespace with no NetworkPolicy is a failed chart render or a namespace created outside the generator. Admission blocks the next pod. A periodic check still pages, because a namespace with no pods is invisible to that rule.
+- **Images and secrets that bypassed the path.** A digest that does not match a signed image, or a `Secret` committed next to the chart values, shows up as an admission error on the next sync. If it does not, the policy is in `Audit` and I have not finished the rollout.
 
 ## Trade-offs
 
