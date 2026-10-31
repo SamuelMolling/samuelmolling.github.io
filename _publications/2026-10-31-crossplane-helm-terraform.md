@@ -1,13 +1,12 @@
 ---
-title: "Terraform, Helm, and Crossplane: A Pattern for the Control Plane and the Data Plane"
+title: "Crossplane, Helm, and Argo CD: A Pattern for the Control Plane and the Data Plane"
 collection: publications
 permalink: /publications/crossplane-helm-terraform
-excerpt: 'A pattern I use with companies that want Terraform for the foundation and Crossplane, packaged with Helm, for per-app infrastructure. Argo CD onboards any repository that carries a topic and any cluster that carries a label. The control plane and the data plane share one cluster per environment, split by account, ownership, and node pool.'
+excerpt: 'A pattern I use when a company wants per-app cloud resources without a ticket for every queue. Crossplane, packaged as Helm charts, is the API. Argo CD onboards repositories by topic and clusters by label. NetworkPolicy is a short values list the chart turns into default-deny. The cluster and the first Argo CD install are foundation work, and then that layer steps back.'
 date: 2026-10-31
 venue: 'Personal website'
 tags:
   - crossplane
-  - terraform
   - helm
   - argocd
   - gitops
@@ -15,11 +14,11 @@ tags:
 {% raw %}
 ## Summary
 
-When a company wants developers to create their own cloud resources, the pattern I reach for has three tools and a strict split of ownership. It is the pattern I have helped teams adopt.
+When a company wants developers to create their own cloud resources, the pattern I reach for is Crossplane for the resources, Helm for the package, and Argo CD for delivery. It is the pattern I have helped teams adopt.
 
-**Terraform** owns the foundation: the network, the cluster, the IAM boundaries, and the first install of Argo CD. **Crossplane** owns the cloud resources that belong to one service, and I package that API as Helm charts so a service author declares a queue the same way they declare a container port. **Argo CD** is the loop that delivers both. It discovers clusters by a label and repositories by a topic, so onboarding is a metadata change, not a new manifest copied by hand.
+**Crossplane** owns the cloud resources that belong to one service. **Helm** is how I ship that API, and how a service author declares a queue the same way they declare a container port or a network allow. **Argo CD** discovers clusters by a label and repositories by a topic, so onboarding is a metadata change, not a new manifest copied by hand. Terraform, or whatever builds the cluster, provisions the network and the cluster and bootstraps Argo CD. Then it steps back.
 
-I keep the control plane and the data plane on the same cluster in each environment. The split is logical. Accounts separate shared state from workloads. Ownership separates Terraform from Crossplane. A tainted node pool separates platform pods from application pods. A dedicated management cluster, with Argo CD aimed at many workload clusters, is a later step. The ApplicationSets below are already written as that fan-out.
+I keep the control plane and the data plane on the same cluster in each environment. The split is logical. A tainted node pool separates platform pods from application pods. Ownership separates the foundation from the claims. A dedicated management cluster, with Argo CD aimed at many workload clusters, is a later step. The ApplicationSets below are already written as that fan-out.
 
 The examples use placeholder names, account ids, and network ids. Copy the shape. Replace the names with your own.
 
@@ -27,221 +26,75 @@ The examples use placeholder names, account ids, and network ids. Copy the shape
 
 These are the outcomes I look for when a team adopts the pattern. The rest of the article is how each one is implemented, and where it bites.
 
-- **Developer self-service.** A service team adds a bucket or a queue in the repository they already own. They do not open a platform ticket, and they do not wait for a Terraform plan, for a resource the platform has already published as a claim.
-- **Guardrails and least privilege.** Crossplane's AWS role is written in Terraform. It can create resources under a name prefix, it must attach a permissions boundary to every role it creates, and it is denied the Terraform state bucket and KMS key destruction. The claim author chooses `uploads`. The composition chooses the account, the region, and the full cloud name.
-- **Clear ownership.** If replacing the object can take the platform down, Terraform owns it. If the object belongs to one service and changes on that service's schedule, Crossplane owns it. Helm is the package format on both sides of that line.
-- **Consistency across environments.** Staging and production run the same modules, the same charts, and the same compositions. What changes is an `EnvironmentConfig`: account, VPC, subnets, OIDC issuer. A queue named `orders` becomes `app-orders-staging` in one account and `app-orders-production` in another, from the same values file.
-- **Less ticket-ops.** A new service is a GitHub topic. A new cluster is a label. A new queue is a few lines of YAML. The tickets that remain are the ones that should remain: a new kind of cloud resource, or a change to the network and the cluster.
-- **Auditability.** The IAM policy, the composition, the claim, and the Application are all in git. Terraform's plan and Argo CD's sync history are the record of what changed. A resource tagged `managed-by: crossplane` is distinguishable from one Terraform still owns. The list of onboarded services is the list of repositories carrying the topic, which GitHub already audits.
+- **Developer self-service.** A service team adds a bucket, a queue, or a network allow in the repository they already own. For a resource the platform has published as a claim or a chart value, that is the whole change.
+- **Guardrails.** The claim author passes a short name such as `uploads`. The composition builds the cloud name, the account, and the region from the environment. NetworkPolicy defaults to deny. An AppProject keeps a service repository on workloads and claims.
+- **Clear ownership.** The foundation owns the network, the cluster, and the Argo CD install. Crossplane owns the objects that belong to one service and change on that service's schedule. Helm is the package on both sides of the platform API: the chart that publishes XRDs, and the chart that emits claims.
+- **Consistency across environments.** Staging and production run the same charts and the same compositions. What changes is an `EnvironmentConfig`: account, VPC, subnets, OIDC issuer. A queue named `orders` becomes `app-orders-staging` in one place and `app-orders-production` in another, from the same values file.
+- **Less ticket-ops.** A new service is a GitHub topic. A new cluster is a label. A new queue is a few lines of YAML. The tickets that remain are a new kind of cloud resource, or a change to the network and the cluster.
+- **Auditability.** The composition, the claim, the NetworkPolicy values, and the Application are in git. Argo CD's sync history is the record of what the cluster did with them. A resource tagged `managed-by: crossplane` is the one a claim created. The list of onboarded services is the list of repositories carrying the topic, which GitHub already audits.
 
-## One cluster, three lines
+## One cluster, then the foundation steps back
 
-Each environment gets one Kubernetes cluster. Argo CD and Crossplane run on it, and the workloads run on it too. I separate the two planes with three lines, and I am explicit about that with the teams I work with, because "control plane" is a phrase people use for a hub cluster they do not have yet.
+Each environment gets one Kubernetes cluster. Argo CD and Crossplane run on it, and the workloads run on it too. I am explicit about that with the teams I work with, because "control plane" is a phrase people use for a hub cluster they do not have yet.
 
-**Accounts.** A shared account holds the Terraform state bucket and the credentials the pull-request pipeline uses to apply it. Each workload account holds the VPC, the cluster, and the per-app cloud resources for one environment. State is central. I key it by the stack path and I prefer the S3 lockfile over a separate lock table. Crossplane's IAM policy denies access to that bucket, so the reconciler cannot read or rewrite the foundation's state.
+The logical split is ownership and placement.
 
-**Ownership.** Terraform owns the long-lived objects: network, cluster, platform KMS, the secret containers, the Crossplane IRSA role, the permissions boundary, and Argo CD itself. Crossplane owns the short-lived, per-app objects: S3 buckets, SQS queues with their DLQ and SNS subscriptions, SNS topics, KMS keys, Secrets Manager secrets, and application IRSA roles. Where both layers create the same kind of object, they follow one naming rule and one dependency rule. A topic exists before a queue subscribes to it, and the subscription is owned by the queue.
+**Ownership.** The foundation provisions the network and the cluster, installs Argo CD, and stops there. Crossplane owns the per-app objects: S3 buckets, SQS queues with their DLQ and SNS subscriptions, SNS topics, KMS keys, and secrets. A topic exists before a queue subscribes to it, and the subscription is owned by the queue.
 
-**Nodes.** A node pool named `platform` carries the taint `workload=platform:NoSchedule`. Argo CD, Crossplane, and the cluster addons tolerate it and set a matching node selector. Application pods land on the other pools, whatever mix of on-demand, spot, and specialized capacity the company needs. Application namespaces get a `workloads=true` label so network policy has a handle.
+**Nodes.** A node pool named `platform` carries the taint `workload=platform:NoSchedule`. Argo CD, Crossplane, and the cluster addons tolerate it. Application pods land on the other pools. Application namespaces get a `workloads=true` label so network policy has a handle.
 
 ```text
-shared account                         workload account (one per environment)
-  Terraform state bucket                 Terraform
-  pipeline role for plans/applies          VPC, cluster, platform KMS
-        ^                                  secret containers
-        |                                  Crossplane IRSA role
-        | state, keyed by stack path       app permissions boundary
-        |                                  Argo CD, installed once
+foundation (once per environment)
+  network, cluster, Argo CD bootstrap
         |
-        +-------------------------------- one cluster
-                                           node pool "platform"
-                                             taint workload=platform:NoSchedule
-                                             Argo CD, Crossplane, addons
-                                           workload node pools
-                                             service pods
-                                             Crossplane claims
-                                               S3, SQS, SNS, KMS, secrets, IRSA
+        v
+one cluster
+  node pool "platform"          workload node pools
+    Argo CD, Crossplane, addons   service pods
+                                  Crossplane claims (S3, SQS, SNS, KMS, secrets)
+                                  NetworkPolicies from the app chart
 ```
 
-A developer can add a queue by editing values. They cannot replace the VPC by editing a claim. A bad chart sync can still affect the cluster both planes share. That shared fate is the trade-off I accept until a management cluster is worth the extra account and the extra operational surface. The label selector is what makes that later step a registration change.
+A developer adds a queue by editing values. Replacing the VPC is foundation work, outside the claim. A bad chart sync can still affect the cluster both planes share. That shared fate is the trade-off I accept until a management cluster is worth the extra operational surface. The label selector is what makes that later step a registration change.
 
-## Terraform owns the foundation
+## The foundation, then it steps back
 
-I split Terraform into two repositories, because the reasons to version them are different.
+Whatever tool builds the account, I use it for three things: the network, the cluster, and the first install of Argo CD. It also registers the cluster Secret with `tier=application`, the environment name, and the account id. Those labels are the contract for discovery below. Repository credentials come from the secret store. They do not go in git.
 
-The **module catalog** is reusable: VPC, EKS, IAM role, the small module that installs Argo CD. It is released by tag. The **live stacks** pin that tag and pass the inputs for each environment. Staging and production call the same module. They differ in CIDRs, account ids, and cluster names, and in nothing else I can avoid.
+The install leaves behind one Application, as a post-install hook, aimed at the GitOps repository. After that hook syncs, Argo CD owns addons and apps. I change the bootstrap rarely.
 
-```hcl
-terraform {
-  source = "git::https://github.com/example/terraform-modules.git//modules/aws/eks?ref=${local.module_version}"
-}
-
-dependency "vpc" {
-  config_path = "../network"
-  mock_outputs = {
-    vpc_id          = "vpc-000"
-    private_subnets = ["subnet-1", "subnet-2", "subnet-3"]
-  }
-  mock_outputs_allowed_terraform_commands = ["init", "plan", "validate"]
-}
-
-inputs = {
-  vpc_id     = dependency.vpc.outputs.vpc_id
-  subnet_ids = dependency.vpc.outputs.private_subnets
-}
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bootstrap
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+spec:
+  source:
+    repoURL: https://github.com/example/gitops.git
+    path: bootstrap
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
 ```
 
-`plan` works before the VPC exists. `apply` still requires the real outputs. The allow-list is what keeps a mocked id out of a real apply. I have seen a plan that looked green because the mock was accepted on apply. Limit the commands.
-
-Remote state lives in the shared account:
-
-```hcl
-remote_state {
-  backend = "s3"
-  config = {
-    encrypt      = true
-    bucket       = "<TFSTATE_BUCKET>"
-    key          = "${path_relative_to_include()}/terraform.tfstate"
-    region       = "us-east-1"
-    use_lockfile = true
-  }
-}
-```
-
-Plans and applies run from a pull request. After the cluster exists, Terraform has one more job, and then it should get out of the way: install Argo CD and register the cluster with the labels the ApplicationSets match on.
-
-```hcl
-resource "helm_release" "argocd" {
-  name       = "argocd"
-  repository = "https://argoproj.github.io/argo-helm"
-  chart      = "argo-cd"
-  namespace  = "argocd"
-
-  values = [yamlencode({
-    extraObjects = [{
-      apiVersion = "argoproj.io/v1alpha1"
-      kind       = "Application"
-      metadata = {
-        name      = "bootstrap"
-        namespace = "argocd"
-        annotations = {
-          "helm.sh/hook" = "post-install,post-upgrade"
-        }
-      }
-      spec = {
-        project = "default"
-        source = {
-          repoURL        = "https://github.com/example/gitops.git"
-          targetRevision = "main"
-          path           = "bootstrap"
-          directory      = { include = "*.yaml" }
-        }
-        destination = {
-          server    = "https://kubernetes.default.svc"
-          namespace = "argocd"
-        }
-        syncPolicy = {
-          automated = { prune = true, selfHeal = true }
-        }
-      }
-    }]
-  })]
-}
-```
-
-That bootstrap Application is a Helm hook. It syncs the GitOps directory that contains the ApplicationSets, and from then on Argo CD owns addons and apps. I treat the Helm release as foundation and I change it rarely. Deleting it deletes the bootstrap.
-
-Platform pods are pinned at install time, before any ApplicationSet exists:
-
-```hcl
-controller = {
-  nodeSelector = { workload = "platform" }
-  tolerations = [{
-    key      = "workload"
-    operator = "Equal"
-    value    = "platform"
-    effect   = "NoSchedule"
-  }]
-}
-```
-
-The same stack writes the cluster secret labels: `tier=application`, the environment name, and the account id. Those labels are the contract for the discovery section below. Repository credentials come from the secret store. They do not go in git.
-
-## The IAM role is the guardrail
-
-Self-service without a fence is a shared admin role with extra steps. The fence is an IRSA role Terraform creates, one per environment, assumed by the Crossplane provider service account. The Helm chart only receives the role ARN. It annotates the service account through a `DeploymentRuntimeConfig`, and the `ProviderConfig` says `credentials.source: IRSA`.
-
-```hcl
-policy_json = jsonencode({
-  Version = "2012-10-17"
-  Statement = [
-    {
-      Sid      = "IamRolesRequireBoundary"
-      Effect   = "Allow"
-      Action   = ["iam:CreateRole", "iam:PutRolePolicy", "iam:AttachRolePolicy"]
-      Resource = ["arn:aws:iam::<ACCOUNT_ID>:role/app-*"]
-      Condition = {
-        StringEquals = {
-          "iam:PermissionsBoundary" = "arn:aws:iam::<ACCOUNT_ID>:policy/app-boundary-<ENV>"
-        }
-      }
-    },
-    {
-      Sid      = "S3UnderPrefix"
-      Effect   = "Allow"
-      Action   = "s3:*"
-      Resource = ["arn:aws:s3:::app-*", "arn:aws:s3:::app-*/*"]
-    },
-    {
-      Sid    = "SqsUnderPrefix"
-      Effect = "Allow"
-      Action = [
-        "sqs:CreateQueue",
-        "sqs:DeleteQueue",
-        "sqs:SetQueueAttributes",
-        "sqs:GetQueueAttributes",
-        "sqs:TagQueue",
-      ]
-      Resource = "arn:aws:sqs:us-east-1:<ACCOUNT_ID>:app-*"
-    },
-    {
-      Sid      = "DenyKmsKeyDestruction"
-      Effect   = "Deny"
-      Action   = ["kms:ScheduleKeyDeletion", "kms:DisableKey"]
-      Resource = "*"
-    },
-    {
-      Sid      = "DenyTerraformState"
-      Effect   = "Deny"
-      Action   = "s3:*"
-      Resource = [
-        "arn:aws:s3:::<TFSTATE_BUCKET>",
-        "arn:aws:s3:::<TFSTATE_BUCKET>/*",
-      ]
-    },
-  ]
-})
-```
-
-I want teams to read this policy as the real control plane.
-
-Roles Crossplane creates must match `app-*` and must carry the permissions boundary. The boundary policy is Terraform's, so a claim cannot widen what an application role is allowed to become. Forget the boundary in a Composition and IAM denies the create. That deny is the outcome I want.
-
-SQS is limited by verb and by prefix. S3 in this example is limited by prefix only (`s3:*` on `app-*`). I leave that difference visible on purpose. A prefix stops Crossplane from touching the state bucket and from creating `prod-billing-archive` outside the pattern. It does not stop a composition from reading a neighboring service's bucket when that bucket is also named `app-*`. If two services must be isolated from each other, the policy needs a tighter resource, or the composition must be the only writer and the names must be unique. Say which one you chose. A review that only checks "it is least privilege" will miss it.
-
-Two denies sit on top of the allows. Crossplane cannot schedule deletion of a KMS key, and it cannot touch the state bucket. A bug in a composition, or a leaked set of credentials for this role, stops at the foundation. The account split becomes real at IAM, which is the only place it is real.
-
-The compositions use the same prefix. The author of the claim passes `orders`. The template builds `app-orders-staging`. Account and region come from the environment, not from the pull request.
+From here a new queue is a values file, a new service is a GitHub topic, and a new cluster is a label.
 
 ## Helm packages the platform API and the app
 
 I use two charts, published as OCI artifacts and pulled by Argo CD.
 
-The **platform chart** is the API. It renders one provider package per AWS service, the `ProviderConfig`, an `EnvironmentConfig`, and an XRD plus a Composition for each resource kind the company is willing to offer: IRSA, KMS, S3, Secrets Manager, SNS, SQS. I pin the upstream Crossplane chart to an exact version. I let the chart we publish float on a patch range such as `0.4.*`. A patch rolls forward on the next sync, to every cluster the generator matches. That is fast, and a bad publish is an incident at the same speed. The upstream control-plane chart stays exact for that reason.
+The **platform chart** is the API. It renders one provider package per AWS service, the `ProviderConfig`, an `EnvironmentConfig`, and an XRD plus a Composition for each resource kind the company is willing to offer: KMS, S3, Secrets Manager, SNS, SQS. I pin the upstream Crossplane chart to an exact version. I let the chart we publish float on a patch range such as `0.4.*`. A patch rolls forward on the next sync, to every cluster the generator matches. That is fast, and a bad publish is an incident at the same speed. The upstream control-plane chart stays exact for that reason.
 
-The **app chart** is what service authors render. One values file describes the workload (image, ports, probes, resources, routes, and who the process may talk to). Another describes cloud resources under `infrastructure:`. The chart emits the Deployment, Service, HPA, PDB, routes, ExternalSecret, ServiceAccount, and the NetworkPolicies described below, and it emits one claim per entry. A small library chart holds the IRSA fragment so every resource template does not reinvent the role.
+The **app chart** is what service authors render. One values file describes the workload (image, ports, probes, resources, routes, and who the process may talk to). Another describes cloud resources under `infrastructure:`. The chart emits the Deployment, Service, HPA, PDB, routes, ExternalSecret, ServiceAccount, and the NetworkPolicies described below, and it emits one claim per entry.
 
-Compositions need the account, the region, the VPC, the private subnets, the OIDC issuer, and the boundary ARN. Those values do not belong in a claim, and I do not hardcode them in the Composition. Crossplane is denied the state bucket, so it cannot look them up either. The hand-off is a values file in the GitOps repository, filled from Terraform outputs and rendered into an `EnvironmentConfig`:
+Compositions need the account, the region, the VPC, the private subnets, and the OIDC issuer. Those values do not belong in a claim, and I do not hardcode them in the Composition. The hand-off is a values file in the GitOps repository, filled when the foundation changes, and rendered into an `EnvironmentConfig`:
 
 ```yaml
 # gitops/addons/crossplane-platform/values/staging.yaml
@@ -249,8 +102,6 @@ aws:
   environment: staging
   region: us-east-1
   accountId: "<ACCOUNT_ID>"
-  provider:
-    iamRoleArn: "arn:aws:iam::<ACCOUNT_ID>:role/app-crossplane-staging"
   network:
     vpcId: <VPC_ID>
     privateSubnetIds: [<SUBNET_A>, <SUBNET_B>, <SUBNET_C>]
@@ -267,7 +118,6 @@ data:
   environment: {{ required "aws.environment is required" .Values.aws.environment }}
   region: {{ .Values.aws.region }}
   oidcProvider: {{ required "aws.oidcProvider is required" .Values.aws.oidcProvider }}
-  permissionsBoundaryArn: {{ .Values.aws.permissionsBoundaryArn | default (printf "arn:aws:iam::%s:policy/app-boundary-%s" (.Values.aws.accountId | toString) .Values.aws.environment) | quote }}
   vpcId: {{ required "aws.network.vpcId is required" .Values.aws.network.vpcId }}
   privateSubnetIds:
     {{- toYaml .Values.aws.network.privateSubnetIds | nindent 4 }}
@@ -295,7 +145,7 @@ data:
     name: function-auto-ready
 ```
 
-This file is a copy. It changes when someone updates it. A subnet change is a Terraform pull request and an edit to this values file. Skip the second edit and the cluster stays healthy, existing resources stay where they are, and the next claim is built against a network the VPC stack no longer has. I put that values file in the same review as the stack when outputs move. The deny on the state bucket is why the copy exists. The copy is what can go stale.
+This file is a copy of the place the cluster lives. It changes when someone updates it. A subnet change in the foundation has to land here too. Skip that edit and the cluster stays healthy, existing resources stay where they are, and the next claim is built against a network the cluster no longer has.
 
 ### What a service author writes
 
@@ -338,7 +188,7 @@ The chart fails the render if `name` is missing. The claim's Kubernetes name is 
 {{`{{- $dlqName := printf "app-%s-dlq-%s" $name $env.environment }}`}}
 ```
 
-The composition emits the queue, the DLQ when requested, one SNS subscription per entry, and a queue policy that allows `sns.amazonaws.com` to send from those topic ARNs. The policy selects its queue with `matchControllerRef` and a `role: main` label, so it binds to the queue this claim owns. Subscriptions live on the queue, which keeps the dependency one-directional and matches the rule in the Terraform modules. The XRD says so in its schema description. That sentence is the documentation a later edit is most likely to see.
+The composition emits the queue, the DLQ when requested, one SNS subscription per entry, and a queue policy that allows `sns.amazonaws.com` to send from those topic ARNs. The policy selects its queue with `matchControllerRef` and a `role: main` label, so it binds to the queue this claim owns. Subscriptions live on the queue, which keeps the dependency one-directional: the topic exists first. The XRD says so in its schema description. That sentence is the documentation a later edit is most likely to see.
 
 Shipping the composition inside Helm has a sharp edge. The composition body is a Go template, evaluated later by `function-go-templating`. Helm evaluates `{{ }}` at render time. Escape every Go expression so Helm stores it as text:
 
@@ -502,7 +352,7 @@ Two limits belong in the open, because they are how NetworkPolicy actually works
 
 The policy is namespace-scoped. The chart can allow billing to *receive* traffic from checkout, and it can allow billing to *open* traffic to payments. Checkout's own chart still has to allow that egress, and payments' chart still has to allow that ingress. An egress rule on the caller does not open the callee. I tell teams to update both values files in the same change, and to expect a timeout when only one side moved.
 
-The objects are inert until the cluster CNI enforces NetworkPolicy. That switch is foundation work, in the same Terraform stack that builds the cluster. Developers inherit enforcement. They do not turn it on per app.
+The objects are inert until the cluster CNI enforces NetworkPolicy. That switch is foundation work, done when the cluster is built. Developers inherit enforcement. They do not turn it on per app.
 
 ## Argo CD discovers work by label
 
@@ -512,7 +362,7 @@ Argo CD ApplicationSets generate Applications from some source of truth outside 
 
 ### Clusters: a label decides who receives work
 
-Argo CD stores each destination as a Secret. The labels on that Secret are the selector. Terraform writes them when it registers the cluster, which keeps the account id next to the cluster instead of pasted into every service repo.
+Argo CD stores each destination as a Secret. The labels on that Secret are the selector. The foundation writes them when it registers the cluster, which keeps the account id next to the cluster instead of pasted into every service repo.
 
 ```yaml
 apiVersion: v1
@@ -542,7 +392,7 @@ generators:
           tier: application
 ```
 
-`tier: application` means "this cluster should receive addons and services." The template reads the other labels. `cluster` becomes part of the Application name and selects the per-environment values file. `accountId` is injected into Helm so the chart can build IRSA ARNs. The service author never types an account id.
+`tier: application` means "this cluster should receive addons and services." The template reads the other labels. `cluster` becomes part of the Application name and selects the per-environment values file. `accountId` is injected into Helm so claims target the right account. The service author never types an account id.
 
 A cluster without that label is invisible to the generator. That is how a future management cluster runs Argo CD and stays out of the matrix. Today I put the label on the same cluster Argo CD runs on, which is why one environment is one cluster. Adding a second workload cluster is registering another Secret with `tier: application`. Every addon and every onboarded service is created there on the next refresh, aimed at that cluster's server, with that cluster's account id. Consistency across environments comes from the generator, not from a checklist.
 
@@ -656,7 +506,7 @@ I have watched teams keep a folder of Application manifests, one per service per
 
 **The account id stays off the developer's keyboard.** Injecting `accountId` from the cluster label is a small line in the template and it removes a class of mistakes I see constantly: staging deploys with a production account id copied from a README. The EnvironmentConfig does the same job for VPC and OIDC on the Crossplane side. Developers describe the resource. The platform describes the place.
 
-**Audit is the metadata plus git.** Who is in production is the set of repositories with the topic, which GitHub records, crossed with the clusters carrying the label, which is a Secret in git or a Terraform resource. What they deployed is the chart version and the values in the service pull request. What they were allowed to create in AWS is the IAM policy and the composition. I can answer "who added a queue" without CloudTrail archaeology: it is the pull request that edited `deploy/resources.yaml`.
+**Audit is the metadata plus git.** Who is in production is the set of repositories with the topic, which GitHub records, crossed with the clusters carrying the label. What they deployed is the chart version and the values in the service pull request. What the queue looks like in the cloud is the composition. I can answer "who added a queue" from the pull request that edited `deploy/resources.yaml`.
 
 **Drift correction is on by default.** `selfHeal` and `prune` mean a manual edit in the cluster comes back to git, and a claim removed from values is deleted. That is the audit property people forget to ask for. A console change is not a durable change.
 
@@ -676,19 +526,17 @@ A topic is also a coarse switch. It says "this repository is a service," not "th
 
 I recommend this pattern with the costs attached. Teams that adopt it and pretend the costs are not there are the ones who call me back.
 
-**Two tools means a hand-off.** Terraform will not see claims. Crossplane will not see the state file. The `EnvironmentConfig` is a copy, and copies go stale when a network change updates only one side. Make the values file part of the network review.
+**The environment file can go stale.** Compositions trust `aws-network`. When the network changes, that values file has to change with it. Make the file part of the network review.
 
-**The IAM fence is uneven if you let it be.** A prefix is a guardrail. It becomes isolation between services only when you design it that way. Verb-scoped SQS and prefix-scoped S3 are different promises. Write down which promise each new composition makes.
+**Self-service starts after the API exists.** A queue the chart already knows is a values change. A new cloud product is an XRD, a composition, and a chart template. That lead time is the ownership boundary doing its job. If every request still needs a new composition, the platform API is too small.
 
-**Self-service starts after the API exists.** A queue the chart already knows is a values change. A new AWS product is a module, an XRD, a composition, an IAM statement, and a chart template. That lead time is the ownership boundary doing its job. If every request still needs a new composition, the platform API is too small, or the team is using Crossplane as a slower Terraform.
-
-**Defaults drift.** Schema defaults, chart defaults, and Terraform module defaults are three places to express "a queue has a DLQ with five receives." They will disagree. The caller service authors actually use is the chart. Test that path.
+**Defaults drift.** Schema defaults and chart defaults are two places to express "a queue has a DLQ with five receives." They will disagree. The caller service authors actually use is the chart. Test that path.
 
 **Helm and Go templates share a delimiter.** Escape composition templates inside the chart. The symptom appears on the claim.
 
 **One cluster is one failure domain.** The platform taint keeps a noisy build off the Crossplane nodes. It does not keep an upgrade, a CNI change, or a cluster-scoped network policy from taking Argo CD down together with the services. I accept that while the environment is small enough that a second cluster is more risk than it removes.
 
-**Conventions are duplicated.** "Topic first, subscription on the queue" lives in the Terraform module and again in the XRD. The name prefix lives in the IAM policy and again in the Go template. Nothing generates one from the other. A sentence in the XRD is cheap insurance. When the module gains a required tag, the composition does not learn it until someone notices two styles of resource in the console.
+**The name prefix lives in the composition.** The XRD describes the rule, and the Go template implements it. A sentence in the schema is cheap insurance. When the prefix or the dependency rule changes, both have to move together, or the console shows two styles of resource.
 
 **Discovery is only as strict as the topic and the AppProject.** The generator will faithfully deploy a repository that should not have been labeled. Spend the time on who can apply `argocd-app`, and on what the `apps` project is allowed to create.
 
@@ -700,7 +548,7 @@ What I have described is one cluster per environment. Argo CD, Crossplane, and t
 
 The generators are already a fan-out. They select clusters by label, and each Application's destination is that cluster's server. When a company is ready for a hub, the change is a registration. Run Argo CD on a management cluster, leave `tier: application` off its Secret, and set that label only on the workload clusters. The same ApplicationSets target those clusters. The management cluster stays out of the matrix.
 
-Two details follow from the generators as written. The Crossplane addon uses the same cluster selector, so this change installs providers and XRDs on the workload clusters. Keeping Crossplane on the management cluster means a different selector for that addon. And each workload cluster still needs its own `EnvironmentConfig`, because account, VPC, and OIDC issuer differ. The IAM role is still created per workload account, by Terraform.
+Two details follow from the generators as written. The Crossplane addon uses the same cluster selector, so this change installs providers and XRDs on the workload clusters. Keeping Crossplane on the management cluster means a different selector for that addon. And each workload cluster still needs its own `EnvironmentConfig`, because account, VPC, and OIDC issuer differ.
 
-What the extra cluster buys is a failure domain the node taint cannot provide. Upgrading a workload cluster leaves the Argo CD that deploys to it running. What it does not replace is the logical split: accounts, Terraform for the foundation, Crossplane for the app, Helm as the package, and discovery by label. Those are the lines I want in place first. The hub is an additional line, and the selector is already shaped for it.
+What the extra cluster buys is a failure domain the node taint cannot provide. Upgrading a workload cluster leaves the Argo CD that deploys to it running. What it does not replace is the logical split: Crossplane for the app, Helm as the package, NetworkPolicy from the same chart, and discovery by label. Those are the lines I want in place first. The hub is an additional line, and the selector is already shaped for it.
 {% endraw %}
